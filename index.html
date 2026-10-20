@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Off the Pitch</title>
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Off the Pitch"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&display=swap">
 <style>
 :root{--hand:'Patrick Hand','Segoe Print','Bradley Hand',system-ui,sans-serif;--head:'Caveat','Segoe Print','Bradley Hand',cursive;
@@ -2016,6 +2017,7 @@ document.addEventListener('visibilitychange',function(){if(!document.hidden&&syO
 window.addEventListener('online',function(){if(syOn())syncNow()});
 try{if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register('sw.js')}catch(e){}
 try{if(localStorage.getItem('fmlife.theme')==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}
+try{if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register('sw.js')}catch(e){}
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
 load();if(!S.profile&&!S.skipPro)tab='pro';boot();fmStart();
 })();
