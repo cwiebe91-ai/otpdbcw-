@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Off the Pitch</title>
-<meta name="build" content="V104"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Off the Pitch"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="build" content="V108"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Off the Pitch"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&display=swap">
 <style>
 :root{--hand:'Patrick Hand','Segoe Print','Bradley Hand',system-ui,sans-serif;--head:'Caveat','Segoe Print','Bradley Hand',cursive;
@@ -334,15 +334,13 @@ var FLK='fmlife.live',FL=(function(){try{return JSON.parse(localStorage.getItem(
 if(!FL.url)FL.url='http://127.0.0.1:8765/fm.json';
 function flPut(){try{localStorage.setItem(FLK,JSON.stringify(FL))}catch(e){}}
 function fmFromJson(j){if(!j||typeof j!=='object'||Array.isArray(j))return null;var t=Object.keys(j).map(function(k){var v=j[k];return v==null||typeof v==='object'?'':k+': '+v}).filter(Boolean).join('\n');return fmParse(t)}
-function fmSig(r){return JSON.stringify([r.date||'',r.club||'',r.rolle||'',r.liga||'',r.land||'',r.sal==null?'':r.sal,r.cend||'',r.stad||'',r.pos==null?'':r.pos,r.bal==null?'':r.bal,r.tb==null?'':r.tb,r.wb==null?'':r.wb,r.seas?JSON.stringify(r.seas):''])}
-function fmNewTit(r){var F=S.fm||{},sn=F.seen||{},o=[];(r.seas||[]).forEach(function(z){var k=z.y;if(z.t>(sn[k]==null?0:sn[k]))o.push([k,z.t-(sn[k]==null?0:sn[k])])});return o}
+function fmSig(r){return JSON.stringify([r.date||'',r.club||'',r.rolle||'',r.liga||'',r.land||'',r.sal==null?'':r.sal,r.cend||'',r.stad||''])}
 function fmChanged(r){var cur=S.career.filter(function(x){return !x.end}).pop();
  if(r.date&&r.date>S.date)return true;
  if(r.club&&(!cur||cur.club.toLowerCase()!==r.club.toLowerCase()))return true;
  if(r.sal!=null&&Math.round(r.sal)!==Math.round(S.salary||0))return true;
  if(r.cend&&cur&&cur.cend!==r.cend)return true;
- if(r.seas&&fmNewTit(r).length)return true;
- if(cur&&(!r.club||cur.club.toLowerCase()===r.club.toLowerCase())){if(r.stad&&cur.stadium!==r.stad)return true;if(r.liga&&cur.liga!==r.liga)return true;if(r.land&&cur.land!==r.land)return true;var F=S.fm||{};if(r.pos!=null&&F.pos!==r.pos)return true}
+ if(cur&&(!r.club||cur.club.toLowerCase()===r.club.toLowerCase())){if(r.stad&&cur.stadium!==r.stad)return true;if(r.liga&&cur.liga!==r.liga)return true;if(r.land&&cur.land!==r.land)return true}
  if(r.rolle&&cur&&cur.rolle!==r.rolle&&(!r.club||cur.club.toLowerCase()===r.club.toLowerCase()))return true;
  return false}
 function fmOffer(j,quiet){var pr=fmFromJson(j);if(!pr){FMMSG='Die Antwort ist kein gültiges FM-Datenobjekt.';return false}
@@ -381,11 +379,7 @@ function fmApply(r){
  if(r.sal!=null){S.salary=r.sal;if(cur)cur.sal=r.sal;log('Gehalt aus FM übernommen: '+eur.format(r.sal)+' pro Monat.')}
  if(r.cend&&cur){cur.cend=r.cend;log('Vertrag bei '+cur.club+' bis '+fd(r.cend)+'.')}
  if(cur&&r.stad&&cur.stadium!==r.stad){cur.stadium=r.stad;log('Stadion aus FM: '+r.stad+'.')}
- if(r.pos!=null||r.bal!=null||r.tb!=null||r.wb!=null){var F=S.fm=S.fm||{};if(r.pos!=null)F.pos=r.pos;if(r.bal!=null)F.bal=r.bal;if(r.tb!=null)F.tb=r.tb;if(r.wb!=null)F.wb=r.wb;F.at=S.date}
- var nt=fmNewTit(r);if(r.seas){var F2=S.fm=S.fm||{};F2.seen=F2.seen||{};F2.aw=r.seas.reduce(function(a,z){return a+z.a},0);F2.tit=r.seas.reduce(function(a,z){return a+z.t},0)}
- done();
- var qs=[];nt.forEach(function(q){for(var i=0;i<q[1];i++)qs.push(q[0])});
- (function nx(){if(!qs.length)return;var y=qs.shift(),st=S.career.filter(function(z){return !z.end}).pop();if(!st)return;setTimeout(function(){ask({title:'🏆 Neuer Titel in '+y,msg:'Der FM verzeichnet für diese Saison einen Titel. Welcher war es?',ok:'Eintragen',fields:[{id:'t',l:'Art',t:'select',o:achOpts(st),v:achOpts(st)[0]},{id:'s',l:'Saison',v:y}]},function(x){st.ach=st.ach||[];st.ach.push({t:x.t,s:x.s,n:''});log('Erfolg (FM): '+x.t+' '+x.s+' mit '+st.club+'.');var sn=S.fm.seen;sn[y]=(sn[y]||0)+1;done();nx()});},60)})()
+ done()
 }
 
 function fmDate(v){v=String(v).trim();var m=v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/),z=function(n){return (n<10?'0':'')+n};if(m)return m[1]+'-'+z(+m[2])+'-'+z(+m[3]);m=v.match(/^(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})$/);if(m)return m[3]+'-'+z(+m[2])+'-'+z(+m[1]);return ''}
@@ -397,11 +391,6 @@ function fmParse(t){var r={},bad=[];String(t).split(/\r?\n/).forEach(function(l)
   else if(/^(liga|league)$/.test(k))r.liga=val;
   else if(/^(land|country)$/.test(k))r.land=val;
   else if(/^(stadion|stadium)$/.test(k))r.stad=val;
-  else if(/^(tabellenplatz|platz|tableposition|position)$/.test(k)&&/^\d{1,2}$/.test(val)){r.pos=+val}
-  else if(/^(clubbalance|kontostand|vereinsvermögen|vereinskonto)$/.test(k)){x=fmMoney(val);if(isFinite(x))r.bal=x;else bad.push('Kontostand „'+val+'“')}
-  else if(/^(seasons|saisons)$/.test(k)){var ss=[];val.split(';').forEach(function(q){var a=q.split(',');if(/^\d{4}\/\d{2}$/.test(a[0])&&a.length>=4)ss.push({y:a[0],p:+a[1]||0,a:+a[2]||0,t:+a[3]||0})});if(ss.length)r.seas=ss;else bad.push('Saisonliste')}
-  else if(/^(transferbudget)$/.test(k)){x=fmMoney(val);if(isFinite(x))r.tb=x;else bad.push('Transferbudget „'+val+'“')}
-  else if(/^(wagebudgetperyear|gehaltsbudget|wagebudget)$/.test(k)){x=fmMoney(val);if(isFinite(x))r.wb=x;else bad.push('Gehaltsbudget „'+val+'“')}
   else if(/^(gehalt|salary)/.test(k)){x=fmMoney(val);if(isFinite(x)&&x>=0){if(/jahr|year/.test(k)||(/jahr|year|p\.?a\./i.test(val)&&!/monat|month/i.test(k+' '+val)))x=Math.round(x/12);r.sal=x}else bad.push('Gehalt „'+val+'“')}
   else if(/^(vertrag|laufzeit|contract)/.test(k)){x=fmDate(val);if(x)r.cend=x;else bad.push('Vertragsende „'+val+'“')}
  });return {r:r,bad:bad}}
@@ -412,13 +401,8 @@ function fmPrev(r){var L=[],cur=S.career.filter(function(x){return !x.end}).pop(
  if(r.sal!=null&&Math.round(r.sal)!==Math.round(S.salary||0))L.push('Gehalt: '+eur.format(S.salary)+' → '+eur.format(r.sal)+' pro Monat');
  if(r.cend)L.push('Vertrag bis '+fd(r.cend));
  if(cur&&(!r.club||cur.club.toLowerCase()===r.club.toLowerCase())){if(r.liga&&cur.liga!==r.liga)L.push('Liga: '+r.liga);if(r.land&&cur.land!==r.land)L.push('Land: '+r.land);if(r.stad&&cur.stadium!==r.stad)L.push('Stadion: '+r.stad)}
- if(r.pos!=null)L.push('Tabellenplatz: '+r.pos+'.');
- fmNewTit(r).forEach(function(q){L.push('Neuer Titel in '+q[0]+(q[1]>1?' ('+q[1]+'x)':'')+': Du wirst nach der Art gefragt')});
- if(r.bal!=null)L.push('Vereinskonto: '+eur.format(r.bal));
- if(r.tb!=null)L.push('Transferbudget: '+eur.format(r.tb));
- if(r.wb!=null)L.push('Gehaltsbudget: '+eur.format(r.wb)+' pro Jahr');
  return L}
-function curCard(){var c=S.career.filter(function(x){return !x.end}).pop();if(!c)return '';return '<div class="card"><div class="item" style="border:0;padding:0">'+crest(c,48)+'<div class="m"><small>Aktuelle Station</small><b>'+esc(c.club)+'</b><small>'+esc(c.rolle)+(c.liga?' · '+esc(c.liga):'')+'</small>'+(c.cend?'<small>Vertrag bis '+fd(c.cend)+'</small>':'')+(S.fm&&S.fm.pos!=null?'<small>Tabellenplatz: '+S.fm.pos+'.</small>':'')+(S.fm&&S.fm.bal!=null?'<small>Vereinskonto: '+eur.format(S.fm.bal)+(S.fm.tb!=null?' · Transfer '+eur.format(S.fm.tb):'')+(S.fm.wb!=null?' · Gehalt '+eur.format(S.fm.wb)+'/Jahr':'')+'</small>':'')+(S.fm&&S.fm.tit!=null?'<small>Titel laut FM: '+S.fm.tit+' · Auszeichnungen: '+S.fm.aw+'</small>':'')+(c.stadium?'<small>Stadion: '+esc(c.stadium)+(c.seats?' · '+esc(c.seats)+' Plätze':'')+'</small>':'')+'</div></div></div>'}
+function curCard(){var c=S.career.filter(function(x){return !x.end}).pop();if(!c)return '';return '<div class="card"><div class="item" style="border:0;padding:0">'+crest(c,48)+'<div class="m"><small>Aktuelle Station</small><b>'+esc(c.club)+'</b><small>'+esc(c.rolle)+(c.liga?' · '+esc(c.liga):'')+'</small>'+(c.cend?'<small>Vertrag bis '+fd(c.cend)+'</small>':'')+(c.stadium?'<small>Stadion: '+esc(c.stadium)+(c.seats?' · '+esc(c.seats)+' Plätze':'')+'</small>':'')+'</div></div></div>'}
 var KE=null,kitN=0;
 var KP=[['plain','Einfarbig'],['stripes','Längsstreifen'],['hoops','Ringel'],['band','Brustring'],['check','Schachbrett'],['sash','Diagonalband'],['half','Halbiert'],['pin','Nadelstreifen'],['sleeve','Farbige Ärmel']];
 var KS=[['home','Heim'],['away','Auswärts'],['third','Ausweich']];
