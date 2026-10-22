@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Off the Pitch</title>
-<meta name="build" content="V152">
+<meta name="build" content="V153">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&display=swap">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:wght@400;600&family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <script>try{var __k=localStorage.getItem("fmlife.skin");if(__k===null||__k==="tun")__k="mgi";if(__k&&__k!=="old")document.documentElement.setAttribute("data-skin",__k)}catch(e){}</script>
@@ -1712,7 +1712,7 @@ horsens=YK
 fredericia=RW`,CLUBCC={R:'#c62828',B:'#1e5bd8',W:'#ffffff',K:'#212121',Y:'#f9d71c',G:'#2e7d32',S:'#6ec1ff',N:'#0d2a6b',M:'#7b1e3a',O:'#ef6c00',P:'#6a1b9a',L:'#7a3b12',X:'#9e9e9e',Q:'#d4a017',I:'#f06292'},CLUBTAB2=null;
 function clubTab2(){if(CLUBTAB2)return CLUBTAB2;CLUBTAB2=[];CLUBRAW.split('\n').forEach(function(l){var i=l.lastIndexOf('=');if(i<1)return;var cs=l.slice(i+1),a,b;if(cs.charAt(0)==='#'){a=cs.slice(0,7);b=cs.slice(7)}else{a=CLUBCC[cs.charAt(0)];b=CLUBCC[cs.charAt(1)]}if(a&&b)try{CLUBTAB2.push([new RegExp(l.slice(0,i)),a,b])}catch(e){}});return CLUBTAB2}
 function clubNorm(n){var s=String(n||'').toLowerCase().replace(/ß/g,'ss').replace(/ø/g,'o').replace(/æ/g,'ae').replace(/ı/g,'i').replace(/ł/g,'l');try{s=s.normalize('NFD').replace(/[\u0300-\u036f]/g,'')}catch(e){}return s.replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim()}
-function officialOk(typed,off){var a=clubNorm(typed),b=clubNorm(off);if(!a||!b||a===b||String(off).length>60)return false;return a.split(' ').every(function(w){return b.indexOf(w)>=0})}
+function officialOk(typed,off){var a=clubNorm(typed),b=clubNorm(off);if(!a||!b||String(off).length>60||String(typed).trim()===String(off).trim())return false;if(a===b)return true;return a.split(' ').every(function(w){return b.indexOf(w)>=0})}
 function clubCols(nm){var k=clubNorm(nm),i;for(i=0;i<CLUBTAB.length;i++)if(CLUBTAB[i][0].test(k))return {c:[CLUBTAB[i][1],CLUBTAB[i][2]],t:1};var T2=clubTab2();for(i=0;i<T2.length;i++)if(T2[i][0].test(k))return {c:[T2[i][1],T2[i][2]],t:1};var n=nameCols(nm);return n?{c:n,t:0}:null}
 function colOwn(st){return !!st.cman||st.kauto===0}
 function nameCols(nm){var m=String(nm||'').toLowerCase().match(/(rot|wei(ß|ss)|blau|gr(ü|ue)n|schwarz|gelb)/g),o=[],i,c;if(!m)return null;for(i=0;i<m.length;i++){c=colName(m[i]);if(c&&o.indexOf(c)<0)o.push(c)}return o.length>1?o.slice(0,2):null}
@@ -1801,6 +1801,7 @@ function wzShow(st,o,r,ci){if(S.career.indexOf(st)<0||st.end)return;
   mv=!!(oc&&cn&&oc!==cn),p=curProp(),rent=!!(p&&p.rent!=null);
  var info=[cn&&'Stadt: '+cn,r&&r.liga&&'Liga: '+r.liga,r&&r.land&&'Land: '+r.land,cr&&cr.desc&&cn+' ('+cr.desc+')'].filter(Boolean).join(' · ');
  var html=((logo||sf||cf)?'<div style="display:flex;gap:8px;margin:6px 0">'+th(logo,'Wappen')+th(sf,'Stadion')+th(cf,'Stadt')+'</div>':'')+(info?'<p style="margin:6px 0">'+esc(info)+'</p>':'')+(o.note?'<p style="margin:6px 0">'+esc(o.note)+'</p>':'')+'<small>Quelle: Wikidata und Wikimedia Commons (Bilder frei nutzbar). Alles ist änderbar, bei Bildern wählst du Ja oder Nein.</small>';
+ var nmOk=!!(r&&r.name&&officialOk(st.club,r.name));if(nmOk)F.push({id:'nm',l:'Vereinsname korrigieren: „'+st.club+'“ → „'+r.name+'“',t:'select',o:['Ja','Nein'],v:'Ja'});
  F.push({id:'s',l:'Stadionname',v:(r&&r.stadion)||st.stadium||''},{id:'p',l:'Plätze (Kapazität, ca.)',v:(r&&+r.plaetze>0)?nf.format(Math.round(+r.plaetze)):(st.seats||'')});
  if(logo)F.push(yn('lg','Wappen übernehmen',false));
  if(sf)F.push(yn('sf','Stadionfoto übernehmen',ownS));
@@ -1811,6 +1812,7 @@ function wzShow(st,o,r,ci){if(S.career.indexOf(st)<0||st.end)return;
   F.push({id:'n',l:'Neue Unterkunft in '+cn,t:'select',o:['Wohnung mieten','Später selbst entscheiden'],v:'Wohnung mieten'},{id:'m',l:'Monatsmiete (€, Kaution 3 Monate, Nebenkosten 20 %)',t:'number',v:rent&&p.rent>0?p.rent:900})}
  whenFree(function(){if(S.career.indexOf(st)<0||st.end)return;ask({title:'Infos zu '+st.club+(mv?' und Umzug':''),html:html,ok:'Übernehmen',no:'Überspringen',fields:F},function(x){
   if(S.career.indexOf(st)<0)return;
+  if(nmOk&&x.nm==='Ja'){var on_=st.club,cc1=clubCols(r.name);st.club=r.name;if(!st.end)S.club=r.name;if(cc1&&!colOwn(st)&&(st.c1!==cc1.c[0]||st.c2!==cc1.c[1])){st.c1=cc1.c[0];st.c2=cc1.c[1];delete st.kits;st.kauto=0}log('Vereinsname korrigiert: '+on_+' → '+r.name+'.')}
   if(r){if(r.land&&!st.land)st.land=r.land;if(r.liga&&!st.liga)st.liga=r.liga;if(r.f1&&!clubCols(st.club)&&palAuto(st)){st.c1=r.f1;if(r.f2)st.c2=r.f2;delete st.kits;st.kauto=0}}
   st.stadium=x.s;st.seats=x.p;kitFreeze(st);
   if(cn){st.city=cn;
