@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Off the Pitch</title>
-<meta name="build" content="V151">
+<meta name="build" content="V152">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&display=swap">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:wght@400;600&family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <script>try{var __k=localStorage.getItem("fmlife.skin");if(__k===null||__k==="tun")__k="mgi";if(__k&&__k!=="old")document.documentElement.setAttribute("data-skin",__k)}catch(e){}</script>
@@ -671,17 +671,8 @@ function fmCard(){var iph=/iPhone|iPad/.test(navigator.userAgent);return '<div c
 function dayBefore(iso){var d=new Date(iso+'T12:00:00');d.setDate(d.getDate()-1);return d.toISOString().slice(0,10)}
 var FMPAL=['#c62828','#1565c0','#2e7d32','#f9a825','#6a1b9a','#00838f','#212121','#ef6c00'];
 function palAuto(c){return !!c&&c.c2==='#ffffff'&&c.c1===FMPAL[hash(c.club)%8]}
-function fmFill(c){try{var nc=clubCols(c.club);if(nc&&palAuto(c)){c.c1=nc.c[0];c.c2=nc.c[1];kitFreeze(c);done()}clubInfo(c.club).then(function(r){if(!r||S.career.indexOf(c)<0){if(!c.city)cityGuessApply(c);return}var ch=[];
- if(r.f1&&palAuto(c)&&!clubCols(c.club)){c.c1=r.f1;if(r.f2)c.c2=r.f2;ch.push('Farben')}
- if(r.land&&!c.land){c.land=r.land;ch.push('Land')}if(r.liga&&!c.liga){c.liga=r.liga;ch.push('Liga')}
- if(r.stadt&&!c.city){c.city=r.stadt;ch.push('Stadt');cityFollow(c)}else if(!c.city)cityGuessApply(c);
- if(r.stadion&&!c.stadium){c.stadium=r.stadion;ch.push('Stadion')}
- if(+r.plaetze>0&&!c.seats){c.seats=new Intl.NumberFormat('de-DE').format(Math.round(+r.plaetze));ch.push('Plätze')}
- kitFreeze(c);done();
- if(ch.length)whenFree(function(){ask({title:'Infos zu '+c.club,msg:'Aus dem Abgleich übernommen ('+(r.src||'Wikidata')+'): '+ch.join(', ')+'. Über „Bearbeiten“ änderbar.',info:1})});
- if(r.foto)setTimeout(function(){photoOffer('club',r.foto,'Stadion',r.src)},400);
- if(r.logo)setTimeout(function(){logoOffer(c,r.logo)},1500)
- },function(){})}catch(e){}}
+function fmFill(c,oc){try{var nc=clubCols(c.club);if(nc&&palAuto(c)){c.c1=nc.c[0];c.c2=nc.c[1];kitFreeze(c);done()}wizard(c,{oc:oc})}catch(e){}}
+
 function fmApply(r,force,ci){
         var cur=S.career.filter(function(z){return !z.end}).pop();
  if(r.ende){var r2={};Object.keys(r).forEach(function(k){if(k==='date')r2[k]=r[k]});
@@ -692,7 +683,7 @@ function fmApply(r,force,ci){
  if(r.club&&cur&&force===true&&!ci){setTimeout(function(){fmClose(r,cur)},60);return}
  if(r.date&&r.date>S.date){S.date=r.date;autoClose();simTo()}
  if(r.club&&(!cur||force===true)){var h=hash(r.club),pal=['#c62828','#1565c0','#2e7d32','#f9a825','#6a1b9a','#00838f','#212121','#ef6c00'],ld=ci?ci.end:S.date,ns=ci?ci.start:S.date;S.career.forEach(function(z){if(!z.end)z.end=ld});
-   cur={id:Date.now()+Math.random(),club:r.club,liga:r.liga||'',land:r.land||'',rolle:r.rolle||'Cheftrainer',start:ns,end:null,c1:pal[h%8],c2:'#ffffff',img:null,sal:0,ach:[],bil:null};S.career.push(cur);S.club=r.club;MV={o:S.city,t:Date.now()};log('Neue Station (FM-Import): '+cur.rolle+' bei '+cur.club+'.');setTimeout(function(){fmFill(cur)},300)}
+   cur={id:Date.now()+Math.random(),club:r.club,liga:r.liga||'',land:r.land||'',rolle:r.rolle||'Cheftrainer',start:ns,end:null,c1:pal[h%8],c2:'#ffffff',img:null,sal:0,ach:[],bil:null};S.career.push(cur);S.club=r.club;var oc0=S.city;log('Neue Station (FM-Import): '+cur.rolle+' bei '+cur.club+'.');setTimeout(function(){fmFill(cur,oc0)},300)}
  else if(cur){if(r.rolle)cur.rolle=r.rolle;if(r.liga)cur.liga=r.liga;if(r.land)cur.land=r.land}
  if(r.sal!=null){S.salary=r.sal;if(cur)cur.sal=r.sal;log('Gehalt aus FM übernommen: '+eur.format(r.sal)+' pro Monat.')}
  if(r.cend&&cur){cur.cend=r.cend;log('Vertrag bei '+cur.club+' bis '+fd(r.cend)+'.')}
@@ -1762,7 +1753,6 @@ function flagBlob(f){var g=function(u){return fetch(u,{mode:'cors'}).then(functi
 function flagGet(st,f,lbl){var bad=function(){setTimeout(function(){ask({title:'Flagge nicht geladen',msg:'Die Flagge konnte nicht geladen werden: kein Netz, oder die Verbindung ist hier gesperrt.',info:1})},0)};
  try{flagBlob(f).then(function(b){if(/\.svg$/i.test(f)&&b.type!=='image/png')b=new Blob([b],{type:'image/svg+xml'});var u=URL.createObjectURL(b),im=new Image();im.onload=function(){try{var iw=im.naturalWidth||im.width||300,ih=im.naturalHeight||im.height||200,cv=document.createElement('canvas'),sc=Math.min(160/iw,160/ih,1);if(iw<160&&/svg/.test(b.type))sc=160/iw;cv.width=Math.max(1,Math.round(iw*sc));cv.height=Math.max(1,Math.round(ih*sc));cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);st.img=cv.toDataURL('image/png');st.flagsrc=(lbl||'Flagge')+': Wikimedia Commons · '+String(f).replace(/_/g,' ').slice(0,60);URL.revokeObjectURL(u);done()}catch(e){bad()}};im.onerror=bad;im.src=u}).catch(bad)}catch(e){bad()}}
 function logoOffer(st,f){if(!f||!st||st.img||isNat(st))return;whenFree(function(){if(S.career.indexOf(st)<0||st.img)return;ask({title:'Vereinswappen gefunden',html:'<img src="'+esc(wdThumb(f,300))+'" alt="" style="width:100%;max-height:200px;object-fit:contain;border-radius:4px;display:block;margin:6px 0;min-height:60px;background:#ddd"><small>Quelle: Wikimedia Commons ('+esc(String(f).replace(/_/g,' '))+'). Als Wappen von '+esc(st.club)+' übernehmen? Ein eigenes Bild kannst du jederzeit hochladen.</small>',ok:'Als Wappen übernehmen',no:'Nein, danke'},function(){flagGet(st,f,'Wappen')})})}
-function logoFetch(st){try{clubInfo(st.club).then(function(r){if(r&&r.logo)logoOffer(st,r.logo)},function(){})}catch(e){}}
 function natFill(st){WDTR.length=0;natFlag(st.club).catch(function(){return ''}).then(function(f){flagOffer(st,f)});var nf=new Intl.NumberFormat('de-DE'),fail=function(m){whenFree(function(){ask({title:'Infos zu '+st.club,msg:m,info:1})})};
  natInfo(st.club).then(function(r){if(!S.nat.some(function(c){return c===st}))return;if(!r){fail('Nichts gefunden. Trage Land, Konföderation und Stadion über „Bearbeiten“ von Hand ein. Ablauf: '+WDTR.join(' · '));return}
   var ch=[];if(r.land&&!st.land){st.land=r.land;ch.push('Land: '+r.land)}if(r.liga&&!st.liga){st.liga=r.liga;ch.push('Konföderation: '+r.liga)}if(r.stadion&&!st.stadium){st.stadium=r.stadion;ch.push('Stadion: '+r.stadion)}if(+r.plaetze>0&&!st.seats){st.seats=nf.format(Math.round(+r.plaetze));ch.push('Plätze: '+st.seats)}
@@ -1779,7 +1769,6 @@ function cityInfo(nm){return viaTwo(function(){return cityLookup(nm)},function()
 function clubInfo(nm){return viaTwo(function(){return clubLookup(nm)},function(){return clubAsk(nm)})}
 function cityGuess(cl){var SW=/^(1\.|fc|sc|sv|vfb|vfl|vfr|tsv|fsv|sg|tsg|rb|bsc|ssv|ksv|fk|ac|as|us|cf|sk|afc|bv|bsv|spvgg|spvg|tus|esv|ev|e\.v\.|ii|iii|u19|u21|u23|hellas|rot|wei(ß|ss)|blau|gr(ü|ue)n|schwarz|gelb)$/i,t=String(cl||'').replace(/\b\d{4}\b/g,' ').split(/[\s\-]+/).filter(function(w){return w&&!SW.test(w)});return t.length&&t.length<=2?t.join(' '):''}
 function cityGuessApply(st){var g=cityGuess(st.club);if(!g||st.end)return;var w=g.split(' '),cand=[g];if(w.length>1)cand.push(w[w.length-1]);var try1=function(i){if(i>=cand.length)return;try{cityInfo(cand[i]).then(function(r){if(r&&S.career.indexOf(st)>=0&&!st.end){st.city=cand[i];done();cityFollow(st)}else try1(i+1)},function(){})}catch(e){}};try1(0)}
-var MV=null;
 function endAsk(st,why,after){var gr=['Entlassung','Rücktritt','Vertrag ausgelaufen','Sonstiges'],g0=gr.indexOf(why)>=0?why:(why?'Sonstiges':'Vertrag ausgelaufen');
  ask({title:st.club+' verlassen',msg:'Die Station wird beendet. Das Gehalt'+(S.salary>0?' ('+eur.format(S.salary)+' pro Monat)':'')+' wird danach nicht mehr gebucht, bis du eine neue Station anlegst.',ok:'Station beenden',fields:[{id:'g',l:'Grund',t:'select',o:gr,v:g0},{id:'ld',l:'Letzter Tag',t:'date',v:S.date},{id:'ab',l:'Abfindung (€, optional)',t:'number',v:''}]},function(x){
   var ld=x.ld||S.date;if(ld<st.start)ld=st.start;if(ld>S.date)ld=S.date;
@@ -1788,27 +1777,48 @@ function endAsk(st,why,after){var gr=['Entlassung','Rücktritt','Vertrag ausgela
   var ab=num(x.ab);if(ab>0)tx('Abfindung: '+st.club,ab);
   log(x.g+': '+st.club+' (letzter Tag '+fd(ld)+')'+(ab>0?', Abfindung '+eur.format(ab):'')+'. Gehaltsbuchung endet.');
   done();if(after)after()})}
-function moveOffer(oc,nc){var p=curProp(),rent=p&&p.rent!=null,pi=p?S.props.indexOf(p):-1,
- F=[];if(p)F.push({id:'a',l:'Bisheriges Zuhause ('+p.name+')',t:'select',o:rent?['Mietvertrag kündigen','Behalten']:['Verkaufen','Behalten'],v:rent?'Mietvertrag kündigen':'Verkaufen'});
- if(p&&!rent)F.push({id:'vp',l:'Verkaufspreis (€, nur bei Verkauf)',t:'number',v:p.price||''});
- F.push({id:'n',l:'Neue Unterkunft in '+nc,t:'select',o:['Wohnung mieten','Später selbst entscheiden'],v:'Wohnung mieten'});
- F.push({id:'m',l:'Monatsmiete (€)',t:'number',v:rent&&p.rent>0?p.rent:900});
- ask({title:'Umzug nach '+nc+'?',msg:'Mit der neuen Station wechselt der Wohnort von '+oc+' nach '+nc+'. Beim Umzug wird das bisherige Zuhause abgewickelt (Verkauf, Kündigung oder behalten) und eine neue Unterkunft angelegt. Nebenkosten rechnet die App mit 20 % der Miete, die Kaution mit drei Monatsmieten.',ok:'Umziehen',no:'Nicht umziehen',onNo:function(){if(MV0){S.city=MV0.o;S.pop=MV0.pop;S.region=MV0.region;S.country=MV0.country;log('Kein Umzug: Wohnort bleibt '+oc+'.');done()}},fields:F},function(x){
-  var nm='Wohnung in '+nc,mi=num(x.m),old=p;
-  if(old&&x.a==='Verkaufen'){var vp=num(x.vp);if(isNaN(vp))vp=old.price||0;S.props.splice(pi,1);tx('Immobilienverkauf: '+old.name,vp);log('Immobilie verkauft: '+old.name+' für '+eur.format(vp)+' (Umzug).')}
-  else if(old&&x.a==='Mietvertrag kündigen'){S.props.splice(pi,1);if(old.dep)tx('Kaution zurück: '+old.name,old.dep);log('Mietvertrag gekündigt: '+old.name+(old.dep?' (Kaution '+eur.format(old.dep)+' zurück)':'')+' (Umzug).')}
+
+function doMove(x,oc,nc){var p=curProp(),rent=p&&p.rent!=null,pi=p?S.props.indexOf(p):-1,nm='Wohnung in '+nc,mi=num(x.m);
+  if(p&&x.a==='Verkaufen'){var vp=num(x.vp);if(isNaN(vp))vp=p.price||0;S.props.splice(pi,1);tx('Immobilienverkauf: '+p.name,vp);log('Immobilie verkauft: '+p.name+' für '+eur.format(vp)+' (Umzug).')}
+  else if(p&&x.a==='Mietvertrag kündigen'){S.props.splice(pi,1);if(p.dep)tx('Kaution zurück: '+p.name,p.dep);log('Mietvertrag gekündigt: '+p.name+(p.dep?' (Kaution '+eur.format(p.dep)+' zurück)':'')+' (Umzug).')}
   if(x.n==='Wohnung mieten'&&mi>=0){var dp=mi*3;S.props.push({name:nm,type:'Wohnung',rent:mi,nk:Math.round(mi*.2),dep:dp,price:0,date:S.date});if(mi>0)tx('Kaution: '+nm,-dp);hsel=S.props.length-1;
-   if(old&&x.a!=='Behalten')[S.cars,S.lux,S.pets].forEach(function(a){(a||[]).forEach(function(z){if(z.loc===old.name)z.loc=nm})});
+   if(p&&x.a!=='Behalten')[S.cars,S.lux,S.pets].forEach(function(a){(a||[]).forEach(function(z){if(z.loc===p.name)z.loc=nm})});
    log('Umzug nach '+nc+': eingezogen in '+nm+' (Miete '+eur.format(mi)+'/Monat, Kaution '+eur.format(dp)+').')}
-  else log('Umzug nach '+nc+'.');
-  MV0=null;done()})}
-var MV0=null;
-function cityApply(st){if(String(st.city||'').trim()!==S.city)cityFollow(st);else cityFetch(S.city)}
-function cityResolve(st,cb){if(!st||st.end||isNat(st)){cb(0);return}if(String(st.city||'').trim()){cityApply(st);cb(1);return}
-var guess=function(){var g=cityGuess(st.club);if(!g){cb(0);return}var w=g.split(' '),cand=[g];if(w.length>1)cand.push(w[w.length-1]);var t=function(i){if(i>=cand.length){cb(0);return}try{cityInfo(cand[i]).then(function(r){if(r){st.city=cand[i];done();cityApply(st);cb(1)}else t(i+1)},function(){t(i+1)})}catch(e){t(i+1)}};t(0)};
-try{clubInfo(st.club).then(function(r){if(r&&r.stadt){st.city=r.stadt;done();cityApply(st);cb(1)}else guess()},function(){guess()})}catch(e){guess()}}
-function cityNone(){whenFree(function(){ask({title:'Stadt nicht gefunden',msg:'Zur aktuellen Station konnte keine Stadt ermittelt werden. Bitte trage sie über „Wohnort" von Hand ein, die Einwohnerzahl lädt die App danach.',info:1})})}
-function cityFollow(st){if(!st||st.end||isNat(st))return;var c=String(st.city||'').trim();if(!c||c===S.city)return;var oc=S.city,mv=MV&&Date.now()-MV.t<180000&&MV.o?MV:null;MV=null;if(mv&&oc&&oc!==c){MV0={o:oc,pop:S.pop,region:S.region,country:S.country};setTimeout(function(){whenFree(function(){moveOffer(oc,c)})},1800)}S.city=c;S.pop='';S.region='';S.country='';setTimeout(function(){cityFetch(c)},600)}
+  else log('Umzug von '+oc+' nach '+nc+'.')}
+function wizard(st,o){o=o||{};if(!st||st.end||isNat(st)||S.career.indexOf(st)<0)return;
+ var ok=function(p){return p.then(function(v){return v},function(){return null})};WDTR.length=0;
+ ok(clubInfo(st.club)).then(function(r){
+  var city=String(st.city||'').trim()||(r&&r.stadt)||'';
+  var byName=function(){var g=cityGuess(st.club);if(!g)return Promise.resolve({n:'',c:null});var w=g.split(' '),cand=[g];if(w.length>1)cand.push(w[w.length-1]);var t=function(i){if(i>=cand.length)return Promise.resolve({n:'',c:null});return ok(cityInfo(cand[i])).then(function(c){return c?{n:cand[i],c:c}:t(i+1)})};return t(0)};
+  (city?ok(cityInfo(city)).then(function(c){return {n:city,c:c}}):byName()).then(function(ci){wzShow(st,o,r,ci)})})}
+function wzShow(st,o,r,ci){if(S.career.indexOf(st)<0||st.end)return;
+ var nf=new Intl.NumberFormat('de-DE'),cr=ci.c,cn=ci.n,oc=String(o.oc||'').trim();
+ if(!r&&!cr){whenFree(function(){ask({title:'Infos zu '+st.club,msg:'Es wurde nichts gefunden (kein Netz, Verein nicht erkannt oder Abfrage gesperrt). Trage Stadt, Liga, Stadion und Farben über „Bearbeiten“ von Hand ein, den Wohnort über die Stadt-Kachel.'+(WDTR.length?' Ablauf ('+bldV()+'): '+WDTR.join(' · '):''),info:1})});return}
+ var logo=(r&&r.logo&&!st.img)?r.logo:'',sf=(r&&r.foto)||'',cf=(cr&&cr.foto)||'',F=[],
+  th=function(f,cap){return f?'<div style="flex:1;min-width:0;text-align:center"><img src="'+esc(wdThumb(f,300))+'" alt="" style="width:100%;height:84px;object-fit:contain;background:#ddd;border-radius:4px;display:block"><small>'+cap+'</small></div>':''},
+  yn=function(id,l,own){return {id:id,l:l+(own?' (ersetzt dein Bild)':''),t:'select',o:['Ja','Nein'],v:own?'Nein':'Ja'}},
+  ownS=!!(S.img&&S.img.club&&!(S.imgsrc&&S.imgsrc.club)),ownC=!!(S.img&&S.img.city&&!(S.imgsrc&&S.imgsrc.city)),
+  mv=!!(oc&&cn&&oc!==cn),p=curProp(),rent=!!(p&&p.rent!=null);
+ var info=[cn&&'Stadt: '+cn,r&&r.liga&&'Liga: '+r.liga,r&&r.land&&'Land: '+r.land,cr&&cr.desc&&cn+' ('+cr.desc+')'].filter(Boolean).join(' · ');
+ var html=((logo||sf||cf)?'<div style="display:flex;gap:8px;margin:6px 0">'+th(logo,'Wappen')+th(sf,'Stadion')+th(cf,'Stadt')+'</div>':'')+(info?'<p style="margin:6px 0">'+esc(info)+'</p>':'')+(o.note?'<p style="margin:6px 0">'+esc(o.note)+'</p>':'')+'<small>Quelle: Wikidata und Wikimedia Commons (Bilder frei nutzbar). Alles ist änderbar, bei Bildern wählst du Ja oder Nein.</small>';
+ F.push({id:'s',l:'Stadionname',v:(r&&r.stadion)||st.stadium||''},{id:'p',l:'Plätze (Kapazität, ca.)',v:(r&&+r.plaetze>0)?nf.format(Math.round(+r.plaetze)):(st.seats||'')});
+ if(logo)F.push(yn('lg','Wappen übernehmen',false));
+ if(sf)F.push(yn('sf','Stadionfoto übernehmen',ownS));
+ if(cr){var same=cn===S.city;F.push({id:'ep',l:'Einwohner (ca.) von '+cn,v:(same&&S.pop)||(cr.pop?nf.format(cr.pop):'')},{id:'rg',l:'Region',v:(same&&S.region)||cr.region||''},{id:'ld',l:'Land',v:(same&&S.country)||cr.country||''});if(cf)F.push(yn('cf','Stadtfoto übernehmen',ownC))}
+ if(mv){F.push({id:'um',l:'Umzug nach '+cn+' (bisher '+oc+')',t:'select',o:['Umziehen','Nicht umziehen'],v:'Umziehen'});
+  if(p)F.push({id:'a',l:'Bisheriges Zuhause ('+p.name+')',t:'select',o:rent?['Mietvertrag kündigen','Behalten']:['Verkaufen','Behalten'],v:rent?'Mietvertrag kündigen':'Verkaufen'});
+  if(p&&!rent)F.push({id:'vp',l:'Verkaufspreis (€, nur bei Verkauf)',t:'number',v:p.price||''});
+  F.push({id:'n',l:'Neue Unterkunft in '+cn,t:'select',o:['Wohnung mieten','Später selbst entscheiden'],v:'Wohnung mieten'},{id:'m',l:'Monatsmiete (€, Kaution 3 Monate, Nebenkosten 20 %)',t:'number',v:rent&&p.rent>0?p.rent:900})}
+ whenFree(function(){if(S.career.indexOf(st)<0||st.end)return;ask({title:'Infos zu '+st.club+(mv?' und Umzug':''),html:html,ok:'Übernehmen',no:'Überspringen',fields:F},function(x){
+  if(S.career.indexOf(st)<0)return;
+  if(r){if(r.land&&!st.land)st.land=r.land;if(r.liga&&!st.liga)st.liga=r.liga;if(r.f1&&!clubCols(st.club)&&palAuto(st)){st.c1=r.f1;if(r.f2)st.c2=r.f2;delete st.kits;st.kauto=0}}
+  st.stadium=x.s;st.seats=x.p;kitFreeze(st);
+  if(cn){st.city=cn;
+   if(mv&&x.um==='Nicht umziehen')log('Kein Umzug: Wohnort bleibt '+oc+'.');
+   else{if(cn!==S.city){S.city=cn;S.pop='';S.region='';S.country=''}if(cr){S.pop=x.ep||'';S.region=x.rg||'';S.country=x.ld||''}if(mv)doMove(x,oc,cn)}}
+  if(x.lg==='Ja')flagGet(st,logo,'Wappen');if(x.sf==='Ja')photoGet('club',sf);if(x.cf==='Ja')photoGet('city',cf);
+  done()})})}
+function cityFollow(st){if(!st||st.end||isNat(st))return;var c=String(st.city||'').trim();if(!c||c===S.city)return;S.city=c;S.pop='';S.region='';S.country='';setTimeout(function(){cityFetch(c)},600)}
 function cityFetch(nm){if(!nm)return;var nf=new Intl.NumberFormat('de-DE');
  var show=function(r){whenFree(function(){if(!r){ask({title:'Stadtinfos',msg:'Für „'+nm+'“ habe ich nichts gefunden. Trage die Angaben selbst ein.',info:1});return}
   ask({title:'Stadtinfos gefunden',msg:nm+(r.desc?' ('+r.desc+')':'')+(r.year?', Stand '+r.year:'')+'. Quelle: '+(r.src||'Wikidata')+'. Prüfe die Angaben und ändere sie bei Bedarf.',ok:'Übernehmen',fields:[{id:'p',l:'Einwohner (ca.)',v:S.pop||nf.format(r.pop)},{id:'r',l:'Region',v:S.region||r.region||''},{id:'c',l:'Land',v:S.country||r.country||''}]},function(x){S.pop=x.p;S.region=x.r;S.country=x.c;done();photoOffer('city',r.foto,'Stadt',r.src)})})};
@@ -1921,8 +1931,9 @@ function view(){
 var DLG=null;
 function balLine(o){if(o.info)return '';var t=o.title||'';if(/Leben|Datum|Geburtstag/.test(t))return '';if(!(/€/.test(o.msg||'')||/kauf|miet|Kredit|beginn|Beitreten|Ausbildung|Aufnahme|Kurs|anlegen|Sparplan|Boot|Yacht/i.test(t)))return '';var b=bal();return '<p class="bl">Dein Kontostand: <b class="'+(b<0?'neg':'')+'">'+eur.format(b)+'</b></p>'}
 function ask(o,cb){DLG={o:o,cb:cb};drawDlg()}
+function dlgF(o){return (o.fields||[]).map(function(f){return '<label>'+esc(f.l)+'</label>'+(f.t==='select'?'<select id="df_'+f.id+'">'+f.o.map(function(x){return '<option'+(x===f.v?' selected':'')+'>'+esc(x)+'</option>'}).join('')+'</select>':'<input id="df_'+f.id+'" type="'+(f.t||'text')+'" value="'+esc(f.v==null?'':f.v)+'"'+(f.t==='number'?' inputmode="decimal" step="any"':'')+'>')}).join('')}
 function drawDlg(){var el=document.getElementById('dlg');if(!DLG){el.innerHTML='';return}var o=DLG.o;if(o.rz){el.innerHTML=rzHtml(o.rz);return}
- if(o.html){el.innerHTML='<div class="ov"><div class="md" role="dialog" style="max-width:640px"><h2>'+esc(o.title)+'</h2>'+o.html+'<div class="row" style="margin-top:12px">'+(o.info?'':'<button class="g" data-dl="no">'+esc(o.no||'Abbrechen')+'</button>')+'<button class="b" data-dl="ok">'+esc(o.ok||'OK')+'</button></div></div></div>';return}
+ if(o.html){el.innerHTML='<div class="ov"><div class="md" role="dialog" style="max-width:640px"><h2>'+esc(o.title)+'</h2>'+o.html+dlgF(o)+'<div class="row" style="margin-top:12px">'+(o.info?'':'<button class="g" data-dl="no">'+esc(o.no||'Abbrechen')+'</button>')+'<button class="b" data-dl="ok">'+esc(o.ok||'OK')+'</button></div></div></div>';return}
  el.innerHTML='<div class="ov"><div class="md" role="dialog"><h2>'+esc(o.title)+'</h2>'+(o.msg?'<p>'+esc(o.msg)+'</p>':'')+balLine(o)+(o.fields||[]).map(function(f){return '<label>'+esc(f.l)+'</label>'+(f.t==='select'?'<select id="df_'+f.id+'">'+f.o.map(function(x){return '<option'+(x===f.v?' selected':'')+'>'+esc(x)+'</option>'}).join('')+'</select>':f.t==='textarea'?'<textarea id="df_'+f.id+'" rows="7">'+esc(f.v==null?'':f.v)+'</textarea>':'<input id="df_'+f.id+'" type="'+(f.t||'text')+'" value="'+esc(f.v==null?'':f.v)+'"'+(f.t==='number'?' inputmode="decimal" step="any"':'')+(f.t==='password'?' autocomplete="current-password" name="password"':f.t==='email'?' autocomplete="username" name="username"':'')+'>')}).join('')+(o.grow?'<button class="g" data-dl="grow" style="margin-top:8px">'+esc(o.grow.label)+'</button>':'')+(o.copy?'<div class="row" style="margin-top:4px"><button class="b" data-dl="sel" style="--pc:var(--or)">🔲 Alles auswählen</button><button class="b" data-dl="copy" style="--pc:var(--gn)">📋 Alles kopieren</button></div><p id="cpst" style="margin:4px 0 0;font-size:.9rem;min-height:1.2em"></p>':'')+'<div class="row" style="margin-top:12px">'+(o.info?'':'<button class="g" data-dl="no">'+esc(o.no||'Abbrechen')+'</button>')+'<button class="b" data-dl="ok">'+esc(o.ok||'OK')+'</button></div></div></div>'}
 function dlgCopy(d){var el=document.getElementById('df_'+d.o.copy),st=document.getElementById('cpst');if(!el)return;var say=function(t,ok){if(st){st.textContent=t;st.style.color=ok?'#1b7a4d':'#b02a2a'}};
  var fb=function(){try{el.focus();el.select();el.setSelectionRange(0,el.value.length);var r=document.execCommand('copy');if(r)say('Kopiert ✓ ('+Math.round(el.value.length/1024)+' KB)',true);else say('Automatisches Kopieren geht hier nicht. Der Text ist markiert: lange drücken und „Kopieren“ wählen.',false)}catch(e){say('Automatisches Kopieren geht hier nicht. Der Text ist markiert: lange drücken und „Kopieren“ wählen.',false)}};
@@ -2639,8 +2650,8 @@ var A={
   famadd:function(){ask({title:'Person hinzufügen',ok:'Hinzufügen',fields:[{id:'n',l:'Name',v:''},{id:'r',l:'Beziehung',t:'select',o:['Mutter','Vater','Bruder','Schwester','Oma','Opa','Onkel','Tante','Freund','Freundin','Sonstige'],v:'Mutter'},{id:'b',l:'Geburtstag',t:'date',v:''}]},function(x){if(!x.n||!x.b||x.b>S.date)return false;S.fam.push({id:Date.now()+Math.random(),name:x.n,rel:x.r,bday:x.b});log('Familie: '+x.n+' ('+x.r+') eingetragen.');done()});return 1},
   famdel:function(d){S.fam.splice(+d.i,1)},
   cityedit:function(){ask({title:'Wohnort',ok:'Speichern',fields:[{id:'c',l:'Stadt',v:S.city||''},{id:'r',l:'Region',v:S.region||''},{id:'l',l:'Land',v:S.country||''},{id:'p',l:'Einwohner (ca.)',v:S.pop||''}]},function(x){var chg=x.c!==S.city,pop=(chg&&x.p===S.pop)?'':x.p,rg=(chg&&x.r===S.region)?'':x.r,ln=(chg&&x.l===S.country)?'':x.l;S.city=x.c;S.pop=pop;S.region=rg;S.country=ln;done();if(x.c&&(chg||!String(pop).trim()||!String(rg).trim()||!String(ln).trim()))cityFetch(x.c)});return 1},
-  clubinfo:function(){stadiumFetch();return 1},
-  citypop:function(){var st_=S.career.filter(function(x){return !x.end&&!isNat(x)}).pop();if(st_){cityResolve(st_,function(ok){if(!ok){if(S.city)cityFetch(S.city);else cityNone()}});return 1}if(!S.city){ask({title:'Einwohnerzahl',msg:'Lege zuerst einen Wohnort fest.',info:1});return 1}cityFetch(S.city);return 1},
+  clubinfo:function(){var c_=S.career.filter(function(x){return !x.end}).pop();if(c_)wizard(c_);else stadiumFetch();return 1},
+  citypop:function(){var st_=S.career.filter(function(x){return !x.end&&!isNat(x)}).pop();if(st_){wizard(st_);return 1}if(!S.city){ask({title:'Einwohnerzahl',msg:'Lege zuerst einen Wohnort fest.',info:1});return 1}cityFetch(S.city);return 1},
   coach:function(){ask({title:'Trainerlizenz',ok:'Speichern',fields:[{id:'l',l:'Lizenz',t:'select',o:['–','C-Lizenz','B-Lizenz','A-Lizenz','UEFA B','UEFA A','UEFA Pro','Fußballlehrer'],v:S.coachLic||'–'}]},function(x){S.coachLic=x.l==='–'?'':x.l;done()});return 1},
   dedit:function(){DEDIT=!DEDIT},
   dreset:function(){S.dash=null},
@@ -2677,8 +2688,8 @@ var A={
       if(start>S.date){var pd=new Date(+start.slice(0,4),+start.slice(5,7)-1,0),pz=function(n){return (n<10?'0':'')+n},prev=pd.getFullYear()+'-'+pz(pd.getMonth()+1)+'-'+pz(pd.getDate());
         if(prev>S.date){S.date=prev;autoClose();simTo()}S.date=start}
       S.career.forEach(function(x){if(!x.end)x.end=start});
-      S.career.push({id:Date.now()+Math.random(),club:club,liga:v('ks_liga'),land:v('ks_land'),city:v('ks_city'),rolle:rolle,start:start,end:null,c1:v('ks_c1'),c2:v('ks_c2'),img:null,sal:sal>0?sal:0,ach:[],bil:null,stadium:(window.__ksInfo&&window.__ksInfo.club===club)?window.__ksInfo.stadium:'',seats:(window.__ksInfo&&window.__ksInfo.club===club)?window.__ksInfo.seats:''});var kf=(window.__ksInfo&&window.__ksInfo.club===club)?window.__ksInfo.foto:'';window.__ksInfo=null;if(kf)setTimeout(function(){photoOffer('club',kf,'Stadion')},400);
-      (function(z){var cc=clubCols(club);if(cc&&z.c1==='#1e88e5'&&z.c2==='#ffffff'){z.c1=cc.c[0];z.c2=cc.c[1]}})(S.career[S.career.length-1]);kitFreeze(S.career[S.career.length-1]);S.club=club;if(sal>0)S.salary=sal;log('Neue Station: '+rolle+' bei '+club+'.');MV={o:S.city,t:Date.now()};(function(ns_){setTimeout(function(){cityResolve(ns_,function(ok){if(!ok)cityNone()})},700);setTimeout(function(){logoFetch(ns_)},2500)})(S.career[S.career.length-1]);
+      S.career.push({id:Date.now()+Math.random(),club:club,liga:v('ks_liga'),land:v('ks_land'),city:v('ks_city'),rolle:rolle,start:start,end:null,c1:v('ks_c1'),c2:v('ks_c2'),img:null,sal:sal>0?sal:0,ach:[],bil:null,stadium:(window.__ksInfo&&window.__ksInfo.club===club)?window.__ksInfo.stadium:'',seats:(window.__ksInfo&&window.__ksInfo.club===club)?window.__ksInfo.seats:''});var kf=(window.__ksInfo&&window.__ksInfo.club===club)?window.__ksInfo.foto:'';window.__ksInfo=null;
+      (function(z){var cc=clubCols(club);if(cc&&z.c1==='#1e88e5'&&z.c2==='#ffffff'){z.c1=cc.c[0];z.c2=cc.c[1]}})(S.career[S.career.length-1]);kitFreeze(S.career[S.career.length-1]);S.club=club;if(sal>0)S.salary=sal;log('Neue Station: '+rolle+' bei '+club+'.');(function(ns_,oc_){setTimeout(function(){wizard(ns_,{oc:oc_})},700)})(S.career[S.career.length-1],S.city);
     };
     var cur=S.career.filter(function(x){return !x.end}).pop();
     if(!cur){go();return}
@@ -2702,7 +2713,7 @@ var A={
     if(nat){var w=Math.round(num(x.wr));if(w>0&&w!==+st.wr){st.wr=w;st.wrh=(st.wrh||[]).concat([{d:S.date,p:w}])}else if(!(w>0))st.wr=''}
     if(chg)log((nat?'Nationalmannschaft geändert: ':'Station geändert: ')+old.club+' → '+x.club+'.');done();cityFollow(st);
     if(chg&&nat){if(st.land===old.land)st.land='';if(st.liga===old.liga)st.liga='';natFill(st)}
-    else if(chg){WDTR.length=0;var nf0=function(m){whenFree(function(){ask({title:'Infos zu '+x.club,msg:m+' Ablauf ('+bldV()+'): '+WDTR.join(' · '),info:1})})};clubInfo(x.club).then(function(r){if(!S.career.some(function(c){return c===st&&c.club===x.club}))return;if(!r){if(!st.city||st.city===old.city)cityGuessApply(st);nf0('Zu diesem Verein wurde nichts gefunden (kein Netz oder Verein nicht erkannt). Trage Stadt, Liga und Farben von Hand ein.');return}var ch=[];if(r.name&&r.name!==st.club&&officialOk(st.club,r.name)){var cc1=clubCols(r.name);st.club=r.name;if(!st.end)S.club=r.name;ch.push('Name: '+r.name);if(cc1&&!colOwn(st)&&(st.c1!==cc1.c[0]||st.c2!==cc1.c[1])){st.c1=cc1.c[0];st.c2=cc1.c[1];delete st.kits;st.kauto=0;kitFreeze(st)}}if(r.f1&&!clubCols(x.club)&&st.c1===old.c1&&st.c2===old.c2&&(r.f1!==old.c1||(r.f2&&r.f2!==old.c2))){st.c1=r.f1;if(r.f2)st.c2=r.f2;delete st.kits;st.kauto=0;kitFreeze(st);ch.push('Farben')}if(r.land&&(!st.land||st.land===old.land)&&st.land!==r.land){st.land=r.land;ch.push('Land: '+r.land)}if(r.liga&&(!st.liga||st.liga===old.liga)&&st.liga!==r.liga){st.liga=r.liga;ch.push('Liga: '+r.liga)}if(r.stadt&&(!st.city||st.city===old.city)&&st.city!==r.stadt){st.city=r.stadt;ch.push('Stadt: '+r.stadt);cityFollow(st)}else if(!r.stadt&&(!st.city||st.city===old.city))cityGuessApply(st);if(ch.length){done();whenFree(function(){ask({title:'Infos zu '+x.club,msg:'Aktualisiert ('+(r.src||'Wikidata')+'): '+ch.join(', ')+'. Bei Bedarf über „Bearbeiten“ ändern.',info:1})})}else nf0('Es gab nichts zu aktualisieren (Land, Liga, Stadt und Farben sind schon eingetragen oder wurden nicht gefunden).');if(r.logo&&!st.img)setTimeout(function(){logoOffer(st,r.logo)},1500);if(!st.end)setTimeout(stadiumFetch,500)},function(){nf0('Die Abfrage ist hier nicht möglich (kein Netz oder gesperrt).')})}});return 1},
+    else if(chg){WDTR.length=0;var nf0=function(m){whenFree(function(){ask({title:'Infos zu '+x.club,msg:m+' Ablauf ('+bldV()+'): '+WDTR.join(' · '),info:1})})};clubInfo(x.club).then(function(r){if(!S.career.some(function(c){return c===st&&c.club===x.club}))return;if(!r){if(!st.city||st.city===old.city)cityGuessApply(st);nf0('Zu diesem Verein wurde nichts gefunden (kein Netz oder Verein nicht erkannt). Trage Stadt, Liga und Farben von Hand ein.');return}var ch=[];if(r.name&&r.name!==st.club&&officialOk(st.club,r.name)){var cc1=clubCols(r.name);st.club=r.name;if(!st.end)S.club=r.name;ch.push('Name: '+r.name);if(cc1&&!colOwn(st)&&(st.c1!==cc1.c[0]||st.c2!==cc1.c[1])){st.c1=cc1.c[0];st.c2=cc1.c[1];delete st.kits;st.kauto=0;kitFreeze(st)}}if(r.f1&&!clubCols(x.club)&&st.c1===old.c1&&st.c2===old.c2&&(r.f1!==old.c1||(r.f2&&r.f2!==old.c2))){st.c1=r.f1;if(r.f2)st.c2=r.f2;delete st.kits;st.kauto=0;kitFreeze(st);ch.push('Farben')}if(r.land&&(!st.land||st.land===old.land)&&st.land!==r.land){st.land=r.land;ch.push('Land: '+r.land)}if(r.liga&&(!st.liga||st.liga===old.liga)&&st.liga!==r.liga){st.liga=r.liga;ch.push('Liga: '+r.liga)}if(r.stadt&&(!st.city||st.city===old.city)&&st.city!==r.stadt){st.city=r.stadt;ch.push('Stadt: '+r.stadt)}else if(!r.stadt&&st.city===old.city)st.city='';done();if(!st.end)setTimeout(function(){wizard(st,{note:ch.length?'Schon übernommen: '+ch.join(', ')+'.':''})},300);else if(ch.length)whenFree(function(){ask({title:'Infos zu '+x.club,msg:'Aktualisiert ('+(r.src||'Wikidata')+'): '+ch.join(', ')+'.',info:1})})},function(){nf0('Die Abfrage ist hier nicht möglich (kein Netz oder gesperrt).')})}});return 1},
   natadd:function(){ask({title:'Nationalmannschaft übernehmen',msg:'Die Nationalmannschaft läuft parallel zu deiner Station. Land, Konföderation, Stadion, Farben und Weltrang schlägt die App danach vor.',ok:'Anlegen',fields:[{id:'n',l:'Nation (z. B. Italien)',v:''},{id:'rolle',l:'Rolle',t:'select',o:ROLES_N,v:'Nationaltrainer'},{id:'start',l:'Start',t:'date',v:S.date},{id:'wr',l:'Weltranglistenplatz (optional)',t:'number',v:''}]},function(x){
     if(!x.n)return false;var cn=S.nat.filter(function(z){return !z.end}).pop(),go=function(){var w=Math.round(num(x.wr)),pal=CRP[hash(x.n)%CRP.length],st={id:Date.now()+Math.random(),club:x.n,liga:'',land:'',rolle:x.rolle,start:x.start||S.date,end:null,c1:pal[0],c2:pal[1],img:null,sal:0,ach:[],bil:null,stadium:'',seats:'',wr:w>0?w:'',wrh:w>0?[{d:S.date,p:w}]:[]};
     if(cn&&cn.end==null)cn.end=st.start;S.nat.push(st);log('Nationalmannschaft übernommen: '+x.n+' ('+x.rolle+').');tab='nat';done();setTimeout(function(){natFill(st)},300)};
