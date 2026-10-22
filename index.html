@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Off the Pitch</title>
-<meta name="build" content="V143"><link rel="manifest" href="manifest.webmanifest?v=2"><link rel="icon" href="icon-192-v2.png"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-v2.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Off the Pitch"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="theme-color" content="#0F2A1C">
+<meta name="build" content="V147"><link rel="manifest" href="manifest.webmanifest?v=2"><link rel="icon" href="icon-192-v2.png"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-v2.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Off the Pitch"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="theme-color" content="#0F2A1C">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&display=swap">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:wght@400;600&family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <script>try{var __k=localStorage.getItem("fmlife.skin");if(__k===null||__k==="tun")__k="mgi";if(__k&&__k!=="old")document.documentElement.setAttribute("data-skin",__k)}catch(e){}</script>
@@ -670,10 +670,10 @@ function fmCard(){var iph=/iPhone|iPad/.test(navigator.userAgent);return '<div c
 function dayBefore(iso){var d=new Date(iso+'T12:00:00');d.setDate(d.getDate()-1);return d.toISOString().slice(0,10)}
 var FMPAL=['#c62828','#1565c0','#2e7d32','#f9a825','#6a1b9a','#00838f','#212121','#ef6c00'];
 function palAuto(c){return !!c&&c.c2==='#ffffff'&&c.c1===FMPAL[hash(c.club)%8]}
-function fmFill(c){try{var nc=nameCols(c.club);if(nc&&palAuto(c)){c.c1=nc[0];c.c2=nc[1];kitFreeze(c);done()}clubInfo(c.club).then(function(r){if(!r||S.career.indexOf(c)<0)return;var ch=[];
- if(r.f1&&palAuto(c)){c.c1=r.f1;if(r.f2)c.c2=r.f2;ch.push('Farben')}
+function fmFill(c){try{var nc=clubCols(c.club);if(nc&&palAuto(c)){c.c1=nc.c[0];c.c2=nc.c[1];kitFreeze(c);done()}clubInfo(c.club).then(function(r){if(!r||S.career.indexOf(c)<0){if(!c.city)cityGuessApply(c);return}var ch=[];
+ if(r.f1&&palAuto(c)&&!clubCols(c.club)){c.c1=r.f1;if(r.f2)c.c2=r.f2;ch.push('Farben')}
  if(r.land&&!c.land){c.land=r.land;ch.push('Land')}if(r.liga&&!c.liga){c.liga=r.liga;ch.push('Liga')}
- if(r.stadt&&!c.city){c.city=r.stadt;ch.push('Stadt');cityFollow(c)}
+ if(r.stadt&&!c.city){c.city=r.stadt;ch.push('Stadt');cityFollow(c)}else if(!c.city)cityGuessApply(c);
  if(r.stadion&&!c.stadium){c.stadium=r.stadion;ch.push('Stadion')}
  if(+r.plaetze>0&&!c.seats){c.seats=new Intl.NumberFormat('de-DE').format(Math.round(+r.plaetze));ch.push('Plätze')}
  kitFreeze(c);done();
@@ -1320,14 +1320,402 @@ var CITYT=['Q515','Q747074','Q484170','Q262166','Q2039348','Q15284','Q1549591','
 function cityUp(en,ctl,hop){var nx=wdIds(en,'P131').slice(-1)[0];if(!nx||hop>=3)return Promise.resolve(null);return wdEnt([nx],'labels|claims',ctl).then(function(X){var e=X[nx];if(!e)return null;if(wdIds(e,'P31').some(function(t){return CITYT.indexOf(t)>-1}))return e;return cityUp(e,ctl,hop+1)})}
 function clubLookup(nm){return wdRun(function(ctl){return wdSearch(nm,ctl).then(function(S0){if(!S0.ids.length)return null;
   return wdEnt(S0.ids,'claims',ctl).then(function(E){var id=null;for(var i=0;i<S0.ids.length;i++){var en=E[S0.ids[i]];if(en&&(wdIds(en,'P118').length||wdIds(en,'P115').length)){id=S0.ids[i];break}}if(!id)return null;
-   var en=E[id],lg=wdIds(en,'P118').slice(-1)[0],vn=wdIds(en,'P115').slice(-1)[0],ct=wdIds(en,'P17')[0]||wdIds(en,'P495')[0],cols=wdIds(en,'P462').slice(0,2),hq=wdIds(en,'P159').slice(-1)[0],need=[lg,vn,ct,hq].concat(cols).filter(Boolean);
-   return wdEnt(need,'labels|claims',ctl).then(function(X){return (hq?Promise.resolve(X[hq]):(vn?cityUp(X[vn],ctl,0):Promise.resolve(null))).then(function(cen){var cap=vn?wdAmt(X[vn],'P1083'):null,o={land:ct?wdLbl(X[ct]):'',stadt:cen?wdLbl(cen):'',liga:lg?wdLbl(X[lg]):'',stadion:vn?wdLbl(X[vn]):'',foto:vn?wdFile(X[vn]):'',plaetze:cap?Math.round(cap.a):0,src:'Wikidata',f1:'',f2:''};cols.forEach(function(cid,k){var ce=X[cid],h='';try{var q=ce&&ce.claims&&ce.claims.P465&&ce.claims.P465[0]&&ce.claims.P465[0].mainsnak.datavalue.value;h=hex6(q)}catch(er){}h=colName(wdLbl(ce))||h;o['f'+(k+1)]=h});return (o.land||o.liga||o.stadion)?o:null})})})})})}
+   var en=E[id],lg=wdIds(en,'P118').slice(-1)[0],vn=wdIds(en,'P115').slice(-1)[0],ct=wdIds(en,'P17')[0]||wdIds(en,'P495')[0],cols=wdIds(en,'P462').slice(0,2),hq=wdIds(en,'P159').slice(-1)[0],need=[id,lg,vn,ct,hq].concat(cols).filter(Boolean);
+   return wdEnt(need,'labels|claims',ctl).then(function(X){return (hq?Promise.resolve(X[hq]):(vn?cityUp(X[vn],ctl,0):Promise.resolve(null))).then(function(cen){var cap=vn?wdAmt(X[vn],'P1083'):null,o={name:X[id]?wdLbl(X[id]):'',land:ct?wdLbl(X[ct]):'',stadt:cen?wdLbl(cen):'',liga:lg?wdLbl(X[lg]):'',stadion:vn?wdLbl(X[vn]):'',foto:vn?wdFile(X[vn]):'',plaetze:cap?Math.round(cap.a):0,src:'Wikidata',f1:'',f2:''};cols.forEach(function(cid,k){var ce=X[cid],h='';try{var q=ce&&ce.claims&&ce.claims.P465&&ce.claims.P465[0]&&ce.claims.P465[0].mainsnak.datavalue.value;h=hex6(q)}catch(er){}h=colName(wdLbl(ce))||h;o['f'+(k+1)]=h});return (o.land||o.liga||o.stadion)?o:null})})})})})}
 function claudeJSON(prompt){if(!(window.claude&&window.claude.use))return Promise.reject(new Error('nocl'));
  return window.claude.use('sample').then(function(sm){if(!sm)throw new Error('nosample');
   return sm(prompt,{modelTier:'quick'}).then(function(r){var t=String(r&&r.text||'').replace(/```json|```/g,'').trim(),m=t.match(/\{[\s\S]*\}/);return m?JSON.parse(m[0]):null})})}
 function cityAsk(nm){return claudeJSON('Nenne zur Stadt oder Gemeinde "'+nm+'" (bei mehrdeutigem Namen die bekannteste) die ungefähre aktuelle Einwohnerzahl, die Region (Bundesland, Region oder Provinz, wie im jeweiligen Land üblich) und das Land. Antworte nur mit JSON ohne Text drumherum: {"pop":Zahl,"region":"...","country":"...","desc":"Art und Lage, z. B. Gemeinde in Venetien, Italien","year":Jahr des Wertes}. Unbekanntes als null.').then(function(o){return o&&+o.pop>0?{pop:Math.round(+o.pop),desc:o.desc||'',year:o.year||'',region:o.region||'',country:o.country||'',src:SRCC}:null})}
 var CNM=[['hellblau','#6ec1ff'],['himmelblau','#6ec1ff'],['light blue','#6ec1ff'],['sky blue','#6ec1ff'],['dunkelblau','#0d2a6b'],['navy','#0d2a6b'],['dark blue','#0d2a6b'],['blau','#1e5bd8'],['blue','#1e5bd8'],['weiß','#ffffff'],['weiss','#ffffff'],['white','#ffffff'],['schwarz','#212121'],['black','#212121'],['weinrot','#7b1e3a'],['claret','#7b1e3a'],['maroon','#7b1e3a'],['burgundy','#7b1e3a'],['rot','#c62828'],['red','#c62828'],['gelb','#f9d71c'],['yellow','#f9d71c'],['gold','#d4a017'],['grün','#2e7d32'],['green','#2e7d32'],['orange','#ef6c00'],['violett','#6a1b9a'],['lila','#6a1b9a'],['purple','#6a1b9a'],['violet','#6a1b9a'],['braun','#6d4c41'],['brown','#6d4c41'],['grau','#9e9e9e'],['gray','#9e9e9e'],['grey','#9e9e9e'],['silber','#c0c0c0'],['silver','#c0c0c0'],['rosa','#f06292'],['pink','#f06292']];
 function colName(n){n=String(n||'').toLowerCase();var best='',bi=1e9,i,p;for(i=0;i<CNM.length;i++){p=n.indexOf(CNM[i][0]);if(p>=0&&p<bi){bi=p;best=CNM[i][1]}}return best}
+var c_RD='#c62828',c_BL='#1e5bd8',c_WH='#ffffff',c_BK='#212121',c_YE='#f9d71c',c_GR='#2e7d32',c_SB='#6ec1ff',c_NV='#0d2a6b',c_WN='#7b1e3a',c_BR='#7a3b12',c_VI='#6a1b9a';
+var CLUBTAB=[[/bayern/,c_RD,c_WH],[/dortmund|bvb/,c_YE,c_BK],[/leipzig/,c_WH,c_RD],[/leverkusen/,c_RD,c_BK],[/frankfurt/,c_BK,c_RD],[/stuttgart/,c_WH,c_RD],[/gladbach|monchengladbach/,c_WH,c_GR],[/wolfsburg/,c_GR,c_WH],[/freiburg/,c_RD,c_BK],[/mainz/,c_RD,c_WH],[/hoffenheim/,c_BL,c_WH],[/augsburg/,c_RD,c_GR],[/werder|bremen/,c_GR,c_WH],[/union berlin/,c_RD,c_WH],[/koln|cologne/,c_WH,c_RD],[/pauli/,c_BR,c_WH],[/hamburger|hsv/,c_WH,c_BL],[/heidenheim/,c_RD,c_BL],[/\bkiel\b/,c_BL,c_WH],[/hertha/,c_BL,c_WH],[/hannover/,c_RD,c_BK],[/dusseldorf/,c_RD,c_WH],[/karlsruhe/,c_BL,c_WH],[/schalke/,c_BL,c_WH],[/darmstadt/,c_BL,c_WH],[/braunschweig/,c_YE,c_BL],[/furth/,c_GR,c_WH],[/rostock/,c_BL,c_WH],[/\bulm\b/,c_BK,c_WH],[/elversberg/,c_BK,c_WH],[/nurnberg/,c_RD,c_BK],[/kaiserslautern/,c_RD,c_WH],[/dresden/,c_YE,c_BK],[/\bessen\b/,c_RD,c_WH],[/lubeck/,c_GR,c_WH],[/bielefeld/,c_BL,c_WH],[/munster/,c_BK,c_GR],[/paderborn/,c_BL,c_BK],[/bochum/,c_BL,c_WH],[/magdeburg/,c_BL,c_WH],[/regensburg/,c_RD,c_WH],[/unterhaching/,c_RD,c_WH],[/1860|munchen 60/,c_BL,c_WH],[/waldhof|mannheim/,c_BL,c_BK],[/duisburg/,c_BL,c_WH],[/aachen/,c_BK,c_YE],[/\baue\b|erzgebirge/,c_VI,c_WH],[/cottbus/,c_RD,c_WH],[/ingolstadt/,c_RD,c_BK],[/wiesbaden/,c_RD,c_WH],[/viktoria koln/,c_RD,c_WH],[/saarbrucken/,c_BL,c_BK],[/hallescher|halle/,c_RD,c_WH],[/real madrid/,c_WH,c_WH],[/barcelona/,'#a50044','#004d98'],[/atletico/,c_RD,c_WH],[/manchester united/,c_RD,c_WH],[/liverpool/,c_RD,c_RD],[/manchester city/,c_SB,c_WH],[/chelsea/,c_BL,c_BL],[/arsenal/,c_RD,c_WH],[/tottenham/,c_WH,c_NV],[/juventus/,c_BK,c_WH],[/milan/,c_RD,c_BK],[/napoli/,c_SB,c_WH],[/\broma\b/,c_WN,c_YE],[/lazio/,c_SB,c_WH],[/paris|psg/,c_NV,c_RD],[/ajax/,c_WH,c_RD],[/verona/,c_YE,c_BL],[/wrexham/,c_RD,c_WH]];
+
+var CLUBRAW=String.raw`manchester city|man city=SW
+manchester united|man utd|man united=RW
+queens park rangers|\bqpr\b=BW
+sheffield united|sheffield utd=RW
+sheffield wed=BW
+west ham=MS
+west brom=NW
+aston villa=MS
+arsenal=RW
+bournemouth=RK
+brentford=RW
+brighton=BW
+burnley=MS
+chelsea=BB
+crystal palace=RB
+everton=BW
+fulham=WK
+leeds=WN
+liverpool=RR
+newcastle=KW
+nottingham forest|notts forest=RW
+sunderland=RW
+tottenham|spurs=WN
+wolverhampton|wolves=QK
+luton=ON
+southampton=RW
+ipswich=BW
+leicester=BW
+birmingham=BW
+blackburn=BW
+bristol=RW
+cardiff=BW
+coventry=SW
+derby=WK
+hull=OK
+middlesbrough=RW
+millwall=BW
+norwich=YG
+oxford united|oxford utd=YB
+plymouth=GW
+portsmouth=BW
+preston=WN
+stoke=RW
+swansea=WK
+watford=YK
+wrexham=RW
+charlton=RW
+real madrid=WW
+barcelona=#a50044#004d98
+atletico madrid|atletico de madrid=RW
+sevilla=WR
+betis=GW
+valencia=WK
+villarreal=YB
+athletic club|athletic bilbao|\bbilbao\b=RW
+real sociedad|\bsociedad\b=BW
+celta=SW
+osasuna=RN
+getafe=BW
+rayo=WR
+mallorca=RK
+alaves=BW
+girona=RW
+espanyol=BW
+las palmas=YB
+levante=RB
+elche=WG
+valladolid=PW
+leganes=BW
+oviedo=BW
+almeria=RW
+granada=RW
+cadiz=YB
+eibar=BR
+zaragoza=WB
+gijon=RW
+santander=GW
+deportivo|\bdepor\b|la coruna=BW
+malaga=SW
+burgos=WK
+castellon=KW
+cordoba=GW
+huesca=BR
+mirandes=RK
+tenerife=WB
+juve stabia=YB
+juventus|\bjuve\b=KW
+\binter\b|internazionale=BK
+\bmilan\b|ac milan|mailand=RK
+napoli|neapel=SW
+\broma\b|as roma|\brom\b=MY
+lazio=SW
+atalanta=BK
+fiorentina=PW
+bologna=RB
+torino=MW
+udinese=KW
+genoa=RB
+sassuolo=GK
+cagliari=RB
+lecce=YR
+parma=YB
+\bcomo\b=BW
+cremonese=XR
+\bpisa\b=KB
+empoli=BW
+monza=RW
+venezia=KG
+frosinone=YB
+spezia=WK
+sampdoria=BW
+palermo=IK
+\bbari\b=WR
+brescia=BW
+cesena=KW
+modena=YB
+reggiana=MW
+catanzaro=YR
+cosenza=RB
+mantova=RW
+padova=WR
+carrarese=YB
+sudtirol|alto adige=RW
+pescara=WS
+avellino=GW
+cittadella=MW
+ascoli=KW
+perugia=RW
+ternana=RG
+salernitana=MW
+paris saint germain|\bpsg\b|paris sg=NR
+marseille=WS
+lyon=WB
+monaco=RW
+lille|\blosc\b=RN
+\blens\b=RY
+rennes=RK
+\bnice\b|nizza=RK
+strasbourg=BW
+nantes=YG
+toulouse=PW
+montpellier=BO
+reims=RW
+\bbrest\b=RW
+havre=SN
+auxerre=WB
+angers=KW
+lorient=OK
+\bmetz\b=MW
+saint etienne|st etienne=GW
+bordeaux=NW
+\bcaen\b=BR
+troyes=BW
+guingamp=RK
+sochaux=YB
+rodez=YR
+\bpau\b=YB
+grenoble=BW
+amiens=WK
+annecy=RW
+dunkerque=BW
+laval=OK
+red star=GW
+clermont=RB
+bastia=BW
+nancy=WR
+psv=RW
+feyenoord=RW
+\baz\b|alkmaar=RW
+twente=RW
+utrecht=RW
+heerenveen=BW
+vitesse=YK
+groningen=GW
+sparta rotterdam=RW
+\bnec\b|nijmegen=RG
+go ahead=RY
+fortuna sittard=YG
+heracles=KW
+zwolle=BW
+waalwijk|\brkc\b=YB
+almere=RK
+willem=RB
+volendam=OW
+excelsior=RK
+telstar=WK
+roda=YK
+graafschap=BW
+cambuur=YB
+den bosch=BW
+ado den haag=YG
+\bnac\b|breda=YK
+\bmvv\b|maastricht=RY
+emmen=RW
+venlo=YK
+benfica=RW
+\bporto\b=BW
+braga=RW
+guimaraes=WK
+famalicao=BW
+estoril=YB
+moreirense=GW
+gil vicente=RB
+casa pia=WK
+arouca=YB
+rio ave=GW
+boavista=KW
+santa clara=RW
+\bnacional\b=KW
+farense=KW
+estrela=RG
+\bavs\b=RW
+alverca=YR
+sporting=GW
+maritimo=GR
+belenenses=BW
+vizela=RW
+chaves=RB
+viseu=GW
+feirense=YB
+penafiel=WB
+leixoes=RW
+pacos=YB
+tondela=GY
+oliveirense=RW
+mafra=RW
+academica=KW
+portimonense=KW
+varzim=RW
+cercle=GK
+club brugge|\bbrugge\b|bruges=BK
+anderlecht=PW
+genk=BW
+\bgent\b=BW
+antwerp=RW
+union saint gilloise|union sg|\busg\b=YB
+standard=RW
+mechelen=RY
+charleroi=KW
+westerlo=YB
+leuven|\boh\b=WG
+kortrijk=RW
+truiden|\bstvv\b=YB
+dender=RW
+beerschot=PW
+eupen=KW
+zulte|waregem=RG
+lokeren=WB
+beveren=YB
+galatasaray=RY
+fenerbahce=YN
+besiktas=KW
+trabzon=MS
+basaksehir=ON
+konya=GW
+sivas=RW
+antalya=RW
+alanya=OG
+kasimpasa=NW
+rizespor|\brize\b=GB
+gaziantep=RK
+samsun=RW
+eyup=PY
+goztepe=YR
+kayseri=YR
+bodrum=GW
+hatay=MW
+ankaragucu=YN
+karagumruk=RK
+pendik=RW
+bursa=GW
+eskisehir=RK
+sakarya=GK
+\bbolu=RW
+bandirma=RW
+umraniye=RK
+\bamed\b=RG
+urfa=GW
+adanaspor=OW
+genclerbirligi=RK
+giresun=GW
+celtic=GW
+rangers=BW
+hearts|heart of midlothian=MW
+hibernian|\bhibs\b=GW
+aberdeen=RW
+dundee united=OK
+dundee=BW
+motherwell=MY
+kilmarnock=BW
+st mirren=KW
+ross county=NR
+st johnstone=BW
+livingston=YK
+falkirk=NR
+partick=RY
+raith=KW
+ayr united=WK
+queen s park=KW
+hamilton=RW
+\bmorton=BW
+arbroath=MW
+dunfermline=KW
+inverness=BR
+airdrie=WR
+salzburg=WR
+blau weiss linz|\bbw linz\b=BW
+\blask\b=KW
+rapid=GW
+austria wien|fk austria|austria vienna=PW
+sturm=KW
+wolfsberg=WK
+altach=YK
+klagenfurt=PW
+\bwsg\b|tirol=WG
+grazer|\bgak\b=RW
+\bried\b=GW
+innsbruck=GK
+kapfenberg=RW
+lustenau=WB
+young boys|\byb\b=YK
+grasshopper=WB
+basel=RB
+zurich=WB
+servette=MW
+lugano=WK
+luzern=BW
+st gallen|sankt gallen=GW
+\bsion\b=RW
+lausanne=BW
+winterthur=RW
+aarau=RW
+\bthun\b=RW
+\bwil\b=RW
+vaduz=RW
+schaffhausen=YK
+xamax=RK
+bellinzona=RW
+olympiakos|olympiacos=RW
+panathinaikos=GW
+\baek\b=YK
+paok=KW
+\baris\b=YK
+\bofi\b=WK
+volos=BW
+asteras=YG
+atromitos=KW
+panaitolikos=GW
+levadiakos=KW
+lamia=BW
+iraklis=BW
+panionios=RB
+apollon=YB
+giannina=RW
+xanthi=YK
+sparta pra=RN
+slavia=WR
+plzen|pilsen=RB
+banik=BW
+liberec=BW
+bohemians=GW
+jablonec=GW
+hradec=RW
+dukla=YR
+pardubice=RW
+kobenhavn|copenhagen=WB
+midtjylland=RK
+brondby=YB
+\bagf\b|aarhus=WB
+\baab\b|aalborg=RW
+randers=BW
+silkeborg=RW
+viborg=GW
+nordsjaelland|nordsjalland=RY
+lyngby=BW
+vejle=RW
+\bob\b|odense=BW
+esbjerg=BW
+horsens=YK
+fredericia=RW`,CLUBCC={R:'#c62828',B:'#1e5bd8',W:'#ffffff',K:'#212121',Y:'#f9d71c',G:'#2e7d32',S:'#6ec1ff',N:'#0d2a6b',M:'#7b1e3a',O:'#ef6c00',P:'#6a1b9a',L:'#7a3b12',X:'#9e9e9e',Q:'#d4a017',I:'#f06292'},CLUBTAB2=null;
+function clubTab2(){if(CLUBTAB2)return CLUBTAB2;CLUBTAB2=[];CLUBRAW.split('\n').forEach(function(l){var i=l.lastIndexOf('=');if(i<1)return;var cs=l.slice(i+1),a,b;if(cs.charAt(0)==='#'){a=cs.slice(0,7);b=cs.slice(7)}else{a=CLUBCC[cs.charAt(0)];b=CLUBCC[cs.charAt(1)]}if(a&&b)try{CLUBTAB2.push([new RegExp(l.slice(0,i)),a,b])}catch(e){}});return CLUBTAB2}
+function clubNorm(n){var s=String(n||'').toLowerCase().replace(/ß/g,'ss').replace(/ø/g,'o').replace(/æ/g,'ae').replace(/ı/g,'i').replace(/ł/g,'l');try{s=s.normalize('NFD').replace(/[\u0300-\u036f]/g,'')}catch(e){}return s.replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim()}
+function officialOk(typed,off){var a=clubNorm(typed),b=clubNorm(off);if(!a||!b||a===b||String(off).length>60)return false;return a.split(' ').every(function(w){return b.indexOf(w)>=0})}
+function clubCols(nm){var k=clubNorm(nm),i;for(i=0;i<CLUBTAB.length;i++)if(CLUBTAB[i][0].test(k))return {c:[CLUBTAB[i][1],CLUBTAB[i][2]],t:1};var T2=clubTab2();for(i=0;i<T2.length;i++)if(T2[i][0].test(k))return {c:[T2[i][1],T2[i][2]],t:1};var n=nameCols(nm);return n?{c:n,t:0}:null}
+function colOwn(st){return !!st.cman||st.kauto===0}
 function nameCols(nm){var m=String(nm||'').toLowerCase().match(/(rot|wei(ß|ss)|blau|gr(ü|ue)n|schwarz|gelb)/g),o=[],i,c;if(!m)return null;for(i=0;i<m.length;i++){c=colName(m[i]);if(c&&o.indexOf(c)<0)o.push(c)}return o.length>1?o.slice(0,2):null}
 function hex6(x){x=String(x||'').trim();if(/^[0-9a-f]{6}$/i.test(x))x='#'+x;return /^#[0-9a-f]{6}$/i.test(x)?x.toLowerCase():''}
 function clubAsk(nm){return claudeJSON('Nenne zum Fußballverein "'+nm+'" (bei Mehrdeutigkeit der bekannteste): Land, Stadt des Vereins, aktuelle Liga (Name der Spielklasse), Name des Heimstadions und dessen Zuschauerkapazität (ungefähr, Sitz- und Stehplätze zusammen) sowie die beiden Vereinsfarben als Hex-Werte. Antworte nur mit JSON ohne Text drumherum: {"land":"...","stadt":"...","liga":"...","stadion":"...","plaetze":Zahl,"farbe1":"#rrggbb","farbe2":"#rrggbb"}. Unbekanntes als null.').then(function(o){if(!o||!(o.land||o.liga||o.stadion))return null;o.src=SRCC;o.f1=hex6(o.farbe1);o.f2=hex6(o.farbe2);return o})}
@@ -1379,6 +1767,8 @@ function natDash(){return (S.nat||[]).filter(function(x){return !x.end}).map(fun
 function natAddCard(){return '<div class="card"><h2>Nationalmannschaft</h2><small style="color:var(--muted)">Manchmal übernimmt man nebenbei ein Nationalteam. Es läuft parallel zur aktuellen Station. Land, Konföderation, Stadion, Farben und Weltrang werden beim Anlegen automatisch vorgeschlagen.</small><button class="b" data-act="natadd" style="margin-top:10px;width:100%">➕ Nationalmannschaft</button></div>'}
 function cityInfo(nm){return viaTwo(function(){return cityLookup(nm)},function(){return cityAsk(nm)})}
 function clubInfo(nm){return viaTwo(function(){return clubLookup(nm)},function(){return clubAsk(nm)})}
+function cityGuess(cl){var SW=/^(1\.|fc|sc|sv|vfb|vfl|vfr|tsv|fsv|sg|tsg|rb|bsc|ssv|ksv|fk|ac|as|us|cf|sk|afc|bv|bsv|spvgg|spvg|tus|esv|ev|e\.v\.|ii|iii|u19|u21|u23|hellas|rot|wei(ß|ss)|blau|gr(ü|ue)n|schwarz|gelb)$/i,t=String(cl||'').replace(/\b\d{4}\b/g,' ').split(/[\s\-]+/).filter(function(w){return w&&!SW.test(w)});return t.length&&t.length<=2?t.join(' '):''}
+function cityGuessApply(st){var g=cityGuess(st.club);if(!g||st.end)return;try{cityInfo(g).then(function(r){if(r&&S.career.indexOf(st)>=0&&!st.end&&(!st.city||st.city!==g)){st.city=g;done();cityFollow(st)}},function(){})}catch(e){}}
 function cityFollow(st){if(!st||st.end||isNat(st))return;var c=String(st.city||'').trim();if(!c||c===S.city)return;S.city=c;S.pop='';S.region='';S.country='';setTimeout(function(){cityFetch(c)},600)}
 function cityFetch(nm){if(!nm)return;var nf=new Intl.NumberFormat('de-DE');
  var show=function(r){whenFree(function(){if(!r){ask({title:'Stadtinfos',msg:'Für „'+nm+'“ habe ich nichts gefunden. Trage die Angaben selbst ein.',info:1});return}
@@ -1391,9 +1781,9 @@ function stadiumFetch(st){WDTR.length=0;var nat=isNat(st),c=nat?st:S.career.filt
 function stadiumAuto(){var c=S.career.filter(function(x){return !x.end}).pop();if(c&&!(c.stadium&&c.seats))stadiumFetch()}
 document.addEventListener('change',function(e){var t=e.target;if(!t||t.id!=='ks_club')return;var nm=t.value.trim(),h=document.getElementById('ks_hint');window.__ksInfo=null;if(!nm){if(h)h.textContent='';return}
  if(h)h.textContent='Suche Infos zu '+nm+' …';
- clubInfo(nm).then(function(r){var h2=document.getElementById('ks_hint'),cur=document.getElementById('ks_club');if(!cur||cur.value.trim()!==nm)return;if(!r||(!r.land&&!r.liga&&!r.stadion)){if(h2)h2.textContent='Nichts gefunden. Trage Land und Liga von Hand ein.';return}
+ clubInfo(nm).then(function(r){var h2=document.getElementById('ks_hint'),cur=document.getElementById('ks_club');if(!cur||cur.value.trim()!==nm)return;if(!r||(!r.land&&!r.liga&&!r.stadion)){if(h2)h2.textContent='Nichts gefunden. Trage Land und Liga von Hand ein.';return}if(r.name&&officialOk(nm,r.name)){cur.value=r.name;nm=r.name}
   var l=document.getElementById('ks_land'),g=document.getElementById('ks_liga');if(l&&!l.value.trim()&&r.land)l.value=r.land;if(g&&!g.value.trim()&&r.liga)g.value=r.liga;var ci=document.getElementById('ks_city');if(ci&&!ci.value.trim()&&r.stadt)ci.value=r.stadt;
-  var k1=document.getElementById('ks_c1'),k2=document.getElementById('ks_c2');if(r.f1&&k1&&k1.value==='#1e88e5')k1.value=r.f1;if(r.f2&&k2&&k2.value==='#ffffff')k2.value=r.f2;
+  var k1=document.getElementById('ks_c1'),k2=document.getElementById('ks_c2'),cc0=clubCols(nm);if(cc0&&k1&&k2&&k1.value==='#1e88e5'&&k2.value==='#ffffff'){k1.value=cc0.c[0];k2.value=cc0.c[1]}else{if(r.f1&&k1&&k1.value==='#1e88e5')k1.value=r.f1;if(r.f2&&k2&&k2.value==='#ffffff')k2.value=r.f2}
   window.__ksInfo={club:nm,foto:r.foto||'',stadium:r.stadion||'',seats:(+r.plaetze>0)?new Intl.NumberFormat('de-DE').format(Math.round(+r.plaetze)):''};
   if(h2)h2.textContent='Vorschlag ('+(r.src||'Wikidata')+'): '+[r.stadt,r.land,r.liga,r.stadion?r.stadion+(window.__ksInfo.seats?' ('+window.__ksInfo.seats+' Plätze)':''):''].filter(Boolean).join(' · ')+'. Bitte prüfen.'},
   function(){var h2=document.getElementById('ks_hint');if(h2)h2.textContent='Automatische Infos sind hier nicht verfügbar. Trage Land und Liga von Hand ein.'})});
@@ -2249,7 +2639,7 @@ var A={
         if(prev>S.date){S.date=prev;autoClose();simTo()}S.date=start}
       S.career.forEach(function(x){if(!x.end)x.end=start});
       S.career.push({id:Date.now()+Math.random(),club:club,liga:v('ks_liga'),land:v('ks_land'),city:v('ks_city'),rolle:rolle,start:start,end:null,c1:v('ks_c1'),c2:v('ks_c2'),img:null,sal:sal>0?sal:0,ach:[],bil:null,stadium:(window.__ksInfo&&window.__ksInfo.club===club)?window.__ksInfo.stadium:'',seats:(window.__ksInfo&&window.__ksInfo.club===club)?window.__ksInfo.seats:''});var kf=(window.__ksInfo&&window.__ksInfo.club===club)?window.__ksInfo.foto:'';window.__ksInfo=null;if(kf)setTimeout(function(){photoOffer('club',kf,'Stadion')},400);
-      kitFreeze(S.career[S.career.length-1]);S.club=club;if(sal>0)S.salary=sal;log('Neue Station: '+rolle+' bei '+club+'.');cityFollow(S.career[S.career.length-1])
+      (function(z){var cc=clubCols(club);if(cc&&z.c1==='#1e88e5'&&z.c2==='#ffffff'){z.c1=cc.c[0];z.c2=cc.c[1]}})(S.career[S.career.length-1]);kitFreeze(S.career[S.career.length-1]);S.club=club;if(sal>0)S.salary=sal;log('Neue Station: '+rolle+' bei '+club+'.');cityFollow(S.career[S.career.length-1]);if(!S.career[S.career.length-1].city){var ns_=S.career[S.career.length-1];setTimeout(function(){if(!ns_.city)cityGuessApply(ns_)},3000)}
     };
     var cur=S.career.filter(function(x){return !x.end}).pop();
     if(!cur){go();return}
@@ -2269,11 +2659,11 @@ var A={
    ask({title:nat?'Nationalmannschaft bearbeiten':'Station bearbeiten',msg:'Ändert nur die Angaben. Das Spieldatum und das Konto bleiben unberührt. Das Enddatum leer lassen, wenn die Station aktuell ist.',ok:'Speichern',fields:F},function(x){
     if(!x.club)return false;if(!x.start)return false;if(x.end&&x.end<x.start)return false;
     var arr=nat?S.nat:S.career;if(!x.end&&arr.some(function(c){return c!==st&&!c.end})){setTimeout(function(){ask({title:'Zwei aktuelle Stationen',msg:'Es gibt schon eine aktuelle Station. Trage bei dieser Station ein Enddatum ein.',info:1})},0);return false}
-    var chg=x.club!==old.club;st.club=x.club;if(!nat){var nc=nameCols(x.club);if(nc&&((chg&&st.c1===old.c1&&st.c2===old.c2)||st.c1===st.c2)){st.c1=nc[0];st.c2=nc[1];delete st.kits;st.kauto=0;kitFreeze(st)}}st.liga=x.liga;st.land=x.land;st.rolle=x.rolle;st.start=x.start;st.end=x.end||null;st.cend=x.cend||'';st.stadium=x.stadium;st.seats=x.seats;if(!nat)st.city=(x.city||'').trim();
+    var chg=x.club!==old.club;st.club=x.club;if(!nat){var cc=clubCols(x.club);if(cc&&!colOwn(st)&&(cc.t?(st.c1!==cc.c[0]||st.c2!==cc.c[1]):((chg&&st.c1===old.c1&&st.c2===old.c2)||st.c1===st.c2))){st.c1=cc.c[0];st.c2=cc.c[1];delete st.kits;st.kauto=0;kitFreeze(st);log('Vereinsfarben gesetzt: '+x.club+'.')}}st.liga=x.liga;st.land=x.land;st.rolle=x.rolle;st.start=x.start;st.end=x.end||null;st.cend=x.cend||'';st.stadium=x.stadium;st.seats=x.seats;if(!nat)st.city=(x.city||'').trim();
     if(nat){var w=Math.round(num(x.wr));if(w>0&&w!==+st.wr){st.wr=w;st.wrh=(st.wrh||[]).concat([{d:S.date,p:w}])}else if(!(w>0))st.wr=''}
     if(chg)log((nat?'Nationalmannschaft geändert: ':'Station geändert: ')+old.club+' → '+x.club+'.');done();cityFollow(st);
     if(chg&&nat){if(st.land===old.land)st.land='';if(st.liga===old.liga)st.liga='';natFill(st)}
-    else if(chg){WDTR.length=0;var nf0=function(m){whenFree(function(){ask({title:'Infos zu '+x.club,msg:m+' Ablauf ('+bldV()+'): '+WDTR.join(' · '),info:1})})};clubInfo(x.club).then(function(r){if(!S.career.some(function(c){return c===st&&c.club===x.club}))return;if(!r){nf0('Zu diesem Verein wurde nichts gefunden (kein Netz oder Verein nicht erkannt). Trage Stadt, Liga und Farben von Hand ein.');return}var ch=[];if(r.f1&&st.c1===old.c1&&st.c2===old.c2&&(r.f1!==old.c1||(r.f2&&r.f2!==old.c2))){st.c1=r.f1;if(r.f2)st.c2=r.f2;delete st.kits;st.kauto=0;kitFreeze(st);ch.push('Farben')}if(r.land&&(!st.land||st.land===old.land)&&st.land!==r.land){st.land=r.land;ch.push('Land: '+r.land)}if(r.liga&&(!st.liga||st.liga===old.liga)&&st.liga!==r.liga){st.liga=r.liga;ch.push('Liga: '+r.liga)}if(r.stadt&&(!st.city||st.city===old.city)&&st.city!==r.stadt){st.city=r.stadt;ch.push('Stadt: '+r.stadt);cityFollow(st)}if(ch.length){done();whenFree(function(){ask({title:'Infos zu '+x.club,msg:'Aktualisiert ('+(r.src||'Wikidata')+'): '+ch.join(', ')+'. Bei Bedarf über „Bearbeiten“ ändern.',info:1})})}else nf0('Es gab nichts zu aktualisieren (Land, Liga, Stadt und Farben sind schon eingetragen oder wurden nicht gefunden).');if(!st.end)setTimeout(stadiumFetch,500)},function(){nf0('Die Abfrage ist hier nicht möglich (kein Netz oder gesperrt).')})}});return 1},
+    else if(chg){WDTR.length=0;var nf0=function(m){whenFree(function(){ask({title:'Infos zu '+x.club,msg:m+' Ablauf ('+bldV()+'): '+WDTR.join(' · '),info:1})})};clubInfo(x.club).then(function(r){if(!S.career.some(function(c){return c===st&&c.club===x.club}))return;if(!r){if(!st.city||st.city===old.city)cityGuessApply(st);nf0('Zu diesem Verein wurde nichts gefunden (kein Netz oder Verein nicht erkannt). Trage Stadt, Liga und Farben von Hand ein.');return}var ch=[];if(r.name&&r.name!==st.club&&officialOk(st.club,r.name)){var cc1=clubCols(r.name);st.club=r.name;if(!st.end)S.club=r.name;ch.push('Name: '+r.name);if(cc1&&!colOwn(st)&&(st.c1!==cc1.c[0]||st.c2!==cc1.c[1])){st.c1=cc1.c[0];st.c2=cc1.c[1];delete st.kits;st.kauto=0;kitFreeze(st)}}if(r.f1&&!clubCols(x.club)&&st.c1===old.c1&&st.c2===old.c2&&(r.f1!==old.c1||(r.f2&&r.f2!==old.c2))){st.c1=r.f1;if(r.f2)st.c2=r.f2;delete st.kits;st.kauto=0;kitFreeze(st);ch.push('Farben')}if(r.land&&(!st.land||st.land===old.land)&&st.land!==r.land){st.land=r.land;ch.push('Land: '+r.land)}if(r.liga&&(!st.liga||st.liga===old.liga)&&st.liga!==r.liga){st.liga=r.liga;ch.push('Liga: '+r.liga)}if(r.stadt&&(!st.city||st.city===old.city)&&st.city!==r.stadt){st.city=r.stadt;ch.push('Stadt: '+r.stadt);cityFollow(st)}else if(!r.stadt&&(!st.city||st.city===old.city))cityGuessApply(st);if(ch.length){done();whenFree(function(){ask({title:'Infos zu '+x.club,msg:'Aktualisiert ('+(r.src||'Wikidata')+'): '+ch.join(', ')+'. Bei Bedarf über „Bearbeiten“ ändern.',info:1})})}else nf0('Es gab nichts zu aktualisieren (Land, Liga, Stadt und Farben sind schon eingetragen oder wurden nicht gefunden).');if(!st.end)setTimeout(stadiumFetch,500)},function(){nf0('Die Abfrage ist hier nicht möglich (kein Netz oder gesperrt).')})}});return 1},
   natadd:function(){ask({title:'Nationalmannschaft übernehmen',msg:'Die Nationalmannschaft läuft parallel zu deiner Station. Land, Konföderation, Stadion, Farben und Weltrang schlägt die App danach vor.',ok:'Anlegen',fields:[{id:'n',l:'Nation (z. B. Italien)',v:''},{id:'rolle',l:'Rolle',t:'select',o:ROLES_N,v:'Nationaltrainer'},{id:'start',l:'Start',t:'date',v:S.date},{id:'wr',l:'Weltranglistenplatz (optional)',t:'number',v:''}]},function(x){
     if(!x.n)return false;var cn=S.nat.filter(function(z){return !z.end}).pop(),go=function(){var w=Math.round(num(x.wr)),pal=CRP[hash(x.n)%CRP.length],st={id:Date.now()+Math.random(),club:x.n,liga:'',land:'',rolle:x.rolle,start:x.start||S.date,end:null,c1:pal[0],c2:pal[1],img:null,sal:0,ach:[],bil:null,stadium:'',seats:'',wr:w>0?w:'',wrh:w>0?[{d:S.date,p:w}]:[]};
     if(cn&&cn.end==null)cn.end=st.start;S.nat.push(st);log('Nationalmannschaft übernommen: '+x.n+' ('+x.rolle+').');tab='nat';done();setTimeout(function(){natFill(st)},300)};
@@ -2318,7 +2708,7 @@ var A={
   kpat:function(d){var st=KE&&ks(KE.id);if(!st)return 1;st.kits=st.kits||{};var k=Object.assign({},kitDef(st,KE.slot));st.kauto=0;k.pat=d.v;if(k.pat!=='plain'&&hx(k.p,'')===hx(k.s,''))k.p='#ffffff';st.kits[KE.slot]=k},
   kreset:function(){var st=KE&&ks(KE.id);if(!st||!st.kits)return 1;st.kauto=0;delete st.kits[KE.slot]},
   kdone:function(){KE=null},
-  kcol:function(d){var st=ks(d.id);if(!st)return 1;var ok=function(x){return /^#[0-9a-f]{6}$/i.test(x)},df=CRP[hash(String(st.club||'x'))%CRP.length],v1=ok(st.c1)?st.c1:df[0],v2=ok(st.c2)?st.c2:df[1],v3=ok(st.c3)?st.c3:(lum(v2)>.55?'#222222':'#ffffff'),cur=(CPT.filter(function(q){return q[0]===(st.cpat||'plain')})[0]||CPT[0])[1];ask({title:'Wappen: '+st.club,msg:'Das Wappen wird aus Farben und Muster gezeichnet. Hast du ein eigenes Bild hochgeladen, bleibt das Bild stehen.',ok:'Speichern',fields:[{id:'a',l:'Farbe 1 (Rand)',t:'color',v:v1},{id:'b',l:'Farbe 2 (Fläche)',t:'color',v:v2},{id:'c',l:'Farbe 3 (Muster und Schrift)',t:'color',v:v3},{id:'m',l:'Muster',t:'select',o:CPT.map(function(q){return q[1]}),v:cur}]},function(x){st.c1=x.a;st.c2=x.b;st.c3=x.c;st.cpat=(CPT.filter(function(q){return q[1]===x.m})[0]||CPT[0])[0];done()});return 1},
+  kcol:function(d){var st=ks(d.id);if(!st)return 1;var ok=function(x){return /^#[0-9a-f]{6}$/i.test(x)},df=CRP[hash(String(st.club||'x'))%CRP.length],v1=ok(st.c1)?st.c1:df[0],v2=ok(st.c2)?st.c2:df[1],v3=ok(st.c3)?st.c3:(lum(v2)>.55?'#222222':'#ffffff'),cur=(CPT.filter(function(q){return q[0]===(st.cpat||'plain')})[0]||CPT[0])[1];ask({title:'Wappen: '+st.club,msg:'Das Wappen wird aus Farben und Muster gezeichnet. Hast du ein eigenes Bild hochgeladen, bleibt das Bild stehen.',ok:'Speichern',fields:[{id:'a',l:'Farbe 1 (Rand)',t:'color',v:v1},{id:'b',l:'Farbe 2 (Fläche)',t:'color',v:v2},{id:'c',l:'Farbe 3 (Muster und Schrift)',t:'color',v:v3},{id:'m',l:'Muster',t:'select',o:CPT.map(function(q){return q[1]}),v:cur}]},function(x){st.cman=1;st.c1=x.a;st.c2=x.b;st.c3=x.c;st.cpat=(CPT.filter(function(q){return q[1]===x.m})[0]||CPT[0])[0];done()});return 1},
   ptime:function(){var p=S.partner;if(!p)return 1;if(p.tdate&&daysTo(p.tdate,S.date)<7){ask({title:'Zeit miteinander',msg:'Ihr hattet gerade erst Zeit füreinander. In '+(7-daysTo(p.tdate,S.date))+' Tagen wieder.',info:1});return 1}p.tdate=S.date;attAdd(p,12);log('Ein ruhiger Abend mit '+p.name+'. Das tut der Beziehung gut.')},
   pgift:function(){var p=S.partner,d=p&&p.bday?bdOcc(p.bday):null;if(!d)return 1;var O=[['Blumen und Karte',60,8],['Schönes Geschenk',150,18],['Großes Geschenk',400,28],['Überraschungsessen',350,30]];
     ask({title:'Geburtstag von '+p.name,msg:'Was schenkst du?',ok:'Schenken',fields:[{id:'o',l:'Geschenk',t:'select',o:O.map(function(o){return o[0]+' ('+eur.format(o[1])+')'}),v:O[1][0]+' ('+eur.format(O[1][1])+')'}]},function(x){var o=O.filter(function(z){return x.o.indexOf(z[0])===0})[0]||O[1];tx('Geburtstagsgeschenk: '+p.name,-o[1]);p.gift={m:mIdx(d)};attAdd(p,o[2]);log('Geburtstag von '+p.name+': '+o[0]+' ('+eur.format(o[1])+').');done()});return 1},
