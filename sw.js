@@ -1,4 +1,4 @@
-const V='offthepitch-V160';
+const V='offthepitch-V173';
 const BILDER=[];
 const SHELL=['./','index.html','manifest.webmanifest','icon-192-v2.png','icon-512-v2.png','apple-touch-icon-v2.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL).then(()=>Promise.allSettled(BILDER.map(u=>c.add(u))))).then(()=>self.skipWaiting()))});
