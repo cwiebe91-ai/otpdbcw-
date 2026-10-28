@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Off the Pitch</title>
-<meta name="build" content="V188"><link rel="manifest" href="manifest.webmanifest?v=2"><link rel="icon" type="image/png" href="icon-192-v2.png"><link rel="apple-touch-icon" href="apple-touch-icon-v2.png"><meta name="theme-color" content="#0F2A1C"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Off the Pitch">
+<meta name="build" content="V189"><link rel="manifest" href="manifest.webmanifest?v=2"><link rel="icon" type="image/png" href="icon-192-v2.png"><link rel="apple-touch-icon" href="apple-touch-icon-v2.png"><meta name="theme-color" content="#0F2A1C"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Off the Pitch">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&display=swap">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:wght@400;600&family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <script>try{var __k=localStorage.getItem("fmlife.skin");if(__k===null||__k==="tun")__k="mgi";if(__k&&__k!=="old")document.documentElement.setAttribute("data-skin",__k)}catch(e){}</script>
@@ -730,6 +730,7 @@ button.g.ib::after{display:none}
 :root[data-skin] .phead:not(.pdash)>.mslot{grid-area:m;justify-self:end;align-self:end;display:flex;flex-direction:column;align-items:flex-end}
 :root[data-skin] .phead:not(.pdash)>.dcol{grid-area:d;justify-self:end;align-self:end}
 @media(max-width:759px){:root[data-skin] .phead:not(.pdash){grid-template-areas:"t t t" "s s s" ". m d";row-gap:8px}}
+.cph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;aspect-ratio:360/250;padding:18px;text-align:center;background:rgba(0,0,0,.18);border:2px dashed rgba(217,180,106,.45);border-radius:6px;color:#F3EAD4}.cph b{font:700 1.15rem var(--head,Georgia,serif)}.cph span{font-size:.9rem;opacity:.85}
 </style>
 </head>
 <body>
@@ -1067,7 +1068,7 @@ function catCards(k){
  return '<div class="card sec"><h2>Immobilien kaufen</h2>'+hint.replace('</small>',' Günstig einsteigen: Wohnwagen, Kleingarten oder Mieten.</small>')+'</div>'+
  HOUSES.map(function(g,gi){return '<div class="card"><h2>'+esc(g.t)+'</h2>'+g.o.map(function(o,i){return catRow('prop',gi,i,o,houseThumb({name:o[0],type:g.ty}))}).join('')+'</div>'}).join('')}
 var RENTS=[['Vereinswohnung (Trainerzimmer)','Wohnung',220,1,.1,'Zimmer im Vereinsheim, Dusche auf dem Flur'],['Dauercamping: Wohnwagen-Stellplatz','Wohnwagen',260,1,.15,'Platzmiete inklusive Strom, Wohnwagen steht schon da'],['WG-Zimmer','Wohnung',320,2,.15,'Gemeinschaftsküche und Bad'],['Möbliertes Zimmer zur Untermiete','Wohnung',420,1,.1,'Kurzfristig kündbar, kleine Kaution'],['Mini-Apartment (möbliert)','Wohnung',520,2,.2,'20 qm mit Kochnische'],['Studio-Apartment','Wohnung',650],['4-Zimmer-Wohnung','Wohnung',1600],['Einfamilienhaus','Haus',2800],['Eigenes Objekt','',0]];
-function rentCard(){return '<div class="card"><h2>Mieten</h2><small style="color:var(--muted)">Nebenkosten: je nach Objekt 10 bis 20 % der Miete pro Monat. Kaution: 1 bis 3 Monatsmieten, kommt beim Auszug zurück. Für den Start mit wenig Geld sind die ersten Einträge am günstigsten.</small>'+RENTS.map(function(r,i){return '<div class="item"><div class="m"><b>'+esc(r[0])+'</b><small>'+(r[5]||r[1]||'frei wählbar')+'</small></div><button class="g" data-act="rent" data-r="'+i+'">'+(r[2]?eur.format(r[2])+'/Monat':'Eigene…')+'</button></div>'}).join('')+'</div>'}
+function rentCard(){return '<div class="card"><h2>Mieten</h2><small style="color:var(--muted)">Nebenkosten: je nach Objekt 10 bis 20 % der Miete pro Monat. Kaution: 1 bis 3 Monatsmieten, kommt beim Auszug zurück. Für den Start mit wenig Geld sind die ersten Einträge am günstigsten.</small>'+RENTS.map(function(r,i){return '<div class="item">'+houseThumb({name:r[0],type:r[1],rent:r[2]||0})+'<div class="m"><b>'+esc(r[0])+'</b><small>'+(r[5]||r[1]||'frei wählbar')+'</small></div><button class="g" data-act="rent" data-r="'+i+'">'+(r[2]?eur.format(r[2])+'/Monat':'Eigene…')+'</button></div>'}).join('')+'</div>'}
 var PMC={Haus:[.010,150],Villa:[.010,450],Ferienhaus:[.010,80],Wohnung:[.008,190],'Grundstück':[.003,10],Wohnwagen:[.03,40]};
 function propMc(p){if(!p||p.rent!=null)return 0;var t=PMC[p.type]||[.010,120];return Math.round(((p.price||0)*t[0]/12+t[1])/5)*5}
 function propMcNote(p){var t=p.type;return t==='Grundstück'?'Grundsteuer, Pflege':t==='Wohnwagen'?'Stellplatz, Versicherung, TÜV':t==='Wohnung'?'Hausgeld, Grundsteuer, Rücklage':'Grundsteuer, Versicherung, Instandhaltung, Strom, Wasser, Heizung'}
@@ -2038,6 +2039,10 @@ function doMove(x,oc,nc){var p=curProp(),rent=p&&p.rent!=null,pi=p?S.props.index
    if(p&&x.a!=='Behalten')[S.cars,S.lux,S.pets].forEach(function(a){(a||[]).forEach(function(z){if(z.loc===p.name)z.loc=nm})});
    log('Umzug nach '+nc+': eingezogen in '+nm+' (Miete '+eur.format(mi)+'/Monat, Kaution '+eur.format(dp)+').')}
   else log('Umzug von '+oc+' nach '+nc+'.')}
+function moveRel(sel,oc,cn){var pr=S.partner;if(!pr||!pAct()||!sel)return;var nm=pr.name,t=trait(pr);
+ if(sel==='Zieht mit'){tx('Umzugskosten (gemeinsam mit '+nm+')',-1200);pr.city=cn;delete pr.far;attAdd(pr,t==='Unabhängig'?-6:-3);news(nm+' zieht mit dir nach '+cn+'. Ein Neuanfang zu zweit, der Abschied von zu Hause fällt ihr aber nicht leicht.')}
+ else if(sel==='Fernbeziehung'){pr.far=S.date;delete pr.together;attAdd(pr,-4);news('Fernbeziehung: '+nm+' bleibt'+(pr.city?' in '+pr.city:'')+', du ziehst nach '+cn+'. Das kostet Zeit und Reisegeld (etwa 150 € im Monat) und belastet die Beziehung.')}
+ else if(sel==='Trennung'){doLeave(pr,S.date,nm+' und du trennt euch wegen des Umzugs nach '+cn+'.')}}
 function wizard(st,o){o=o||{};if(!st||st.end||isNat(st)||S.career.indexOf(st)<0)return;
  var ok=function(p){return p.then(function(v){return v},function(){return null})};WDTR.length=0;
  ok(clubInfo(st.club)).then(function(r){
@@ -2062,7 +2067,8 @@ function wzShow(st,o,r,ci){if(S.career.indexOf(st)<0||st.end)return;
  if(mv){F.push({id:'um',l:'Umzug nach '+cn+' (bisher '+oc+')',t:'select',o:['Umziehen','Nicht umziehen'],v:'Umziehen'});
   if(p)F.push({id:'a',l:'Bisheriges Zuhause ('+p.name+')',t:'select',o:rent?['Mietvertrag kündigen','Behalten']:['Verkaufen','Behalten'],v:rent?'Mietvertrag kündigen':'Verkaufen'});
   if(p&&!rent)F.push({id:'vp',l:'Verkaufspreis (€, nur bei Verkauf)',t:'number',v:p.price||''});
-  F.push({id:'n',l:'Neue Unterkunft in '+cn,t:'select',o:['Wohnung mieten','Später selbst entscheiden'],v:'Wohnung mieten'},{id:'m',l:'Monatsmiete (€, Kaution 3 Monate, Nebenkosten 20 %)',t:'number',v:rent&&p.rent>0?p.rent:900})}
+  F.push({id:'n',l:'Neue Unterkunft in '+cn,t:'select',o:['Wohnung mieten','Später selbst entscheiden'],v:'Wohnung mieten'},{id:'m',l:'Monatsmiete (€, Kaution 3 Monate, Nebenkosten 20 %)',t:'number',v:rent&&p.rent>0?p.rent:900});
+  if(pAct()&&!(S.partner.city&&S.partner.city===cn&&!S.partner.together)){var pr0=S.partner,tg0=!!pr0.together;F.push({id:'pm',l:'Deine Partnerin '+pr0.name+(pr0.city&&!tg0?' (wohnt in '+pr0.city+')':''),t:'select',o:tg0?['Zieht mit','Fernbeziehung','Trennung']:['Fernbeziehung','Trennung'],v:tg0?'Zieht mit':'Fernbeziehung'})}}
  whenFree(function(){if(S.career.indexOf(st)<0||st.end)return;ask({title:'Infos zu '+st.club+(mv?' und Umzug':''),html:html,ok:'Übernehmen',no:'Überspringen',fields:F},function(x){
   if(S.career.indexOf(st)<0)return;
   if(nmOk&&x.nm==='Ja'){var on_=st.club,cc1=clubCols(r.name);st.club=r.name;if(!st.end)S.club=r.name;if(cc1&&!colOwn(st)&&(st.c1!==cc1.c[0]||st.c2!==cc1.c[1])){st.c1=cc1.c[0];st.c2=cc1.c[1];delete st.kits;st.kauto=0}log('Vereinsname korrigiert: '+on_+' → '+r.name+'.')}
@@ -2070,7 +2076,7 @@ function wzShow(st,o,r,ci){if(S.career.indexOf(st)<0||st.end)return;
   st.stadium=x.s;st.seats=x.p;kitFreeze(st);
   if(cn){st.city=cn;
    if(mv&&x.um==='Nicht umziehen')log('Kein Umzug: Wohnort bleibt '+oc+'.');
-   else{if(cn!==S.city){S.city=cn;S.pop='';S.region='';S.country=''}if(cr){S.pop=x.ep||'';S.region=x.rg||'';S.country=x.ld||''}if(mv)doMove(x,oc,cn)}}
+   else{if(cn!==S.city){S.city=cn;S.pop='';S.region='';S.country=''}if(cr){S.pop=x.ep||'';S.region=x.rg||'';S.country=x.ld||''}if(mv){doMove(x,oc,cn);if(x.pm)moveRel(x.pm,oc,cn)}}}
   if(x.lg==='Ja')flagGet(st,logo,'Wappen');if(x.sf==='Ja')photoGet('club',sf);if(x.cf==='Ja')photoGet('city',cf);
   done()})})}
 function cityFollow(st){if(!st||st.end||isNat(st))return;var c=String(st.city||'').trim();if(!c||c===S.city)return;S.city=c;S.pop='';S.region='';S.country='';setTimeout(function(){cityFetch(c)},600)}
@@ -2118,7 +2124,7 @@ function polHtml(it,n){var im=(S.img&&S.img[it.sl])||it.ph,hh=hash(it.sl),r=(hh%
 function zuView(){var ps=S.props,pp=curProp(),bg=bgOf(pp),sl=bgSlot(pp),it=polItems(),left=it.filter(function(x,i){return i%2===0}),right=it.filter(function(x,i){return i%2===1}),h='';
  var fold=ps.length>1?'<div class="fold">'+ps.map(function(x,i){var b=bgOf(x),r=(hash(x.name)%5)-2;return '<button class="fb'+(x===pp?' act':'')+'" data-act="hsel" data-i="'+i+'" style="--r:'+r+'deg" title="'+esc(x.name)+(x===pp?'':' öffnen')+'"><span class="ft">'+esc(x.name)+'</span><span class="fp">'+(b?'<img src="'+esc(b)+'" alt="">':'<svg viewBox="0 0 360 250" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'+scene(x)+'</svg>')+'</span></button>'}).join('')+'</div>':'';
  var ctl='<div class="pcb"><label class="pcm" title="Eigenes Hintergrundbild hochladen">📷<input type="file" accept="image/*" data-imgslot="'+esc(sl)+'" data-max="1000" hidden></label>'+'</div>';
- var center='<div class="cpin">'+(bg?'<img src="'+esc(bg)+'" alt="'+esc(pp?pp.name:'Dein Zuhause')+'">':'<svg viewBox="0 0 360 250" role="img" aria-label="Dein Zuhause">'+scene(pp)+'</svg>')+ctl+'</div>';
+ var center='<div class="cpin">'+(bg?'<img src="'+esc(bg)+'" alt="'+esc(pp?pp.name:'Dein Zuhause')+'">':!pp?'<div class="cph"><b>Noch keine Immobilie</b><span>Kaufe oder miete eine unter Wohnen → Immobilien.</span></div>':'<svg viewBox="0 0 360 250" role="img" aria-label="Dein Zuhause">'+scene(pp)+'</svg>')+(pp?ctl:'')+'</div>';
  var nL=[],nR=[],nB=[];it.forEach(function(x,i){(i<4?(i%2?nR:nL):nB).push([x,i])});
  var side=function(a){return a.map(function(q){return polHtml(q[0],q[1])}).join('')};
  var hero=center.replace('<div class="cpin">','<div class="cpin"><div class="clabel">'+esc(pp?pp.name:'Dein Zuhause')+'</div>');
@@ -2379,7 +2385,7 @@ function monthLife(m,dt){var fx=bdayEvents(m,dt);
  S.pets.slice().forEach(function(p){if(!p.die)p.die=dieOf(p);if(mIdx(p.die)<=m){var ag=Math.floor(petAgeM(p,m)/12),fee=(p.k==='cat'||p.k==='dog')?180:p.k==='horse'?600:30;S.pets=S.pets.filter(function(z){return z!==p});S.gone.push({name:p.name,kind:p.kind,v:p.v,k:p.k,col:p.col,born:p.born||p.since,died:dt,age:ag});tx('Tierarzt & Abschied: '+p.name,-fee,dt);fx+=fee;log(p.name+' ('+p.kind+') ist mit '+ag+' Jahren gestorben. Du vermisst '+(p.k==='bird'||p.k==='lizard'||p.k==='axo'?'ihn':'ihn')+' sehr.',dt);return}
   var c=petC(p,m);if(c>0){tx('Haustier '+p.name+' ('+p.kind+'): '+(PNOTE[p.k]||'Futter, Tierarzt'),-c,dt);fx+=c}});
  var pr=S.partner;if(pr&&pr.status!=='Getrennt'&&pr.status!=='Geschieden'){var rm=m-mIdx(pr.since);if(rm===6)log('Ihr seid jetzt ein halbes Jahr zusammen: '+pr.name+'.',dt);else if(rm>0&&rm%12===0)log('Jahrestag: '+rm/12+' Jahr'+(rm>12?'e':'')+' mit '+pr.name+'.',dt);
-  if(pr.wed){var wm=m-mIdx(pr.wed);if(wm>0&&wm%12===0)log('Hochzeitstag: '+wm/12+'. Jahr verheiratet mit '+pr.name+'.',dt)}if(pr.together&&pr.geld==='Ausgeber'){tx('Gemeinsamer Haushalt: Shopping und Ausgehen ('+pr.name+')',-250,dt);fx+=250}if(S.pinc===1&&pr.together&&PJOB[pr.job])tx('Gehalt '+pr.name+' (Haushalt)',PJOB[pr.job],dt);if(!attTick(pr,dt,rm))partnerRisk(pr,m,dt,rm)}
+  if(pr.wed){var wm=m-mIdx(pr.wed);if(wm>0&&wm%12===0)log('Hochzeitstag: '+wm/12+'. Jahr verheiratet mit '+pr.name+'.',dt)}if(pr.far&&!pr.together){tx('Fernbeziehung: Reisen zu '+pr.name,-150,dt);fx+=150}if(pr.together&&pr.geld==='Ausgeber'){tx('Gemeinsamer Haushalt: Shopping und Ausgehen ('+pr.name+')',-250,dt);fx+=250}if(S.pinc===1&&pr.together&&PJOB[pr.job])tx('Gehalt '+pr.name+' (Haushalt)',PJOB[pr.job],dt);if(!attTick(pr,dt,rm))partnerRisk(pr,m,dt,rm)}
  return fx}
 var TR=['Treu','Treu','Treu','Normal','Normal','Flirtfreudig','Unabhängig','Eifersüchtig'];
 function trait(p){return p.trait||TR[hash(p.name||'')%TR.length]}
@@ -2387,7 +2393,7 @@ function doLeave(pr,dt,why){pr.status='Getrennt';pr.splitDate=dt;S.ev=null;news(
 function attOf(p){return p.att==null?70:Math.max(0,Math.min(100,p.att))}
 function attAdd(p,n){p.att=Math.max(0,Math.min(100,attOf(p)+n))}
 function attDec(pr){return {Treu:1.5,Normal:2.5,Flirtfreudig:3.5,'Unabhängig':1.5,'Eifersüchtig':4.5}[trait(pr)]||2.5}
-function attTick(pr,dt,rm){if(rm<1)return false;attAdd(pr,-attDec(pr));
+function attTick(pr,dt,rm){if(rm<1)return false;attAdd(pr,-attDec(pr));if(pr.far)attAdd(pr,pr.trait==='Eifersüchtig'?-3:pr.trait==='Unabhängig'?-.5:-1.5);
  if(pr.att<=0){if(!pr.ult){pr.ult=1;pr.att=10;news('Letzte Warnung: '+pr.name+' hat die Geduld fast verloren. Kümmere dich jetzt, sonst ist die Beziehung vorbei.',dt);return false}doLeave(pr,dt,pr.name+' verlässt dich: „Du hast dich einfach nicht mehr gekümmert.“');return true}
  if(pr.att>=40)pr.ult=0;
  if(pr.att<30){if(!pr.warn){pr.warn=1;news('Achtung: '+pr.name+' fühlt sich vernachlässigt. Die Beziehungsleiste ist unter 30 %.',dt)}}else if(pr.att>=45)pr.warn=0;return false}
@@ -2415,7 +2421,7 @@ function partnerMs(p){
   h+=msRow('💔','Status: '+esc(p.status),p.splitDate?'Getrennt seit '+fd(p.splitDate):'');
   if(p.status==='Getrennt'&&p.wed){var left=12-mAge(p.splitDate||p.since);h+=msRow('⚖️','Scheidung',left>0?'Das gesetzliche Trennungsjahr läuft noch '+left+' Monate.':'Das Trennungsjahr ist vorbei. Kosten etwa 3.500 € (Anwalt und Gericht).',left>0?'':'<button class="g" data-act="divorce">Scheiden</button>')}
   return h+'</div>'}
- var tg=p.together;h+=msRow(tg?'✅':rm>=6?'⭕':'🔒','Zusammenziehen',tg?'Seit '+fd(tg):rm>=6?'Ihr kennt euch lange genug.':'Frühestens nach 6 Monaten, noch '+(6-rm)+' Monate.',tg||rm<6?'':'<button class="g" data-act="mvin">Einziehen</button>');
+ var tg=p.together;h+=(p.far&&!tg?msRow('✈️','Fernbeziehung','Seit '+fd(p.far)+(p.city?' · '+esc(p.city)+' ↔ '+esc(S.city||'?'):'')+' · belastet die Beziehung, etwa 150 € Reisekosten im Monat.','<button class="g" data-act="mvin">Zusammenziehen</button>'):'')+(p.far&&!tg?'':msRow(tg?'✅':rm>=6?'⭕':'🔒','Zusammenziehen',tg?'Seit '+fd(tg):rm>=6?'Ihr kennt euch lange genug.':'Frühestens nach 6 Monaten, noch '+(6-rm)+' Monate.',tg||rm<6?'':'<button class="g" data-act="mvin">Einziehen</button>'));
  var eng=p.eng||p.wed;h+=msRow(eng?'✅':rm>=12?'⭕':'🔒','Verlobung',eng?'Seit '+fd(p.eng||p.wed):rm>=12?'Zeit für den Antrag.':'Frühestens nach 12 Monaten, noch '+(12-rm)+' Monate.',eng||rm<12?'':'<button class="g" data-act="engage">Antrag</button>');
  var ea=p.eng?mAge(p.eng):0;h+=msRow(p.wed?'✅':p.eng&&ea>=6?'⭕':'🔒','Hochzeit',p.wed?'Verheiratet seit '+fd(p.wed):p.eng?(ea>=6?'Jetzt möglich, unter Freizeit → Aktivitäten.':'Frühestens 6 Monate nach der Verlobung, noch '+(6-ea)+' Monate.'):'Erst nach der Verlobung.');
  if(S.preg){var left=mIdx(S.preg.due)-mIdx(S.date);h+=msRow('🤰','Schwangerschaft','Geburt am '+fd(S.preg.due)+' ('+(left>1?'noch '+left+' Monate':left===1?'noch 1 Monat':'jetzt')+').')}
@@ -2740,9 +2746,9 @@ async function syncNow(){if(!syOn()||syBusy)return;syBusy=true;syMsg='Gleiche ab
   Object.keys(lm).forEach(function(id){var q=rm['slot:'+id],t=lm[id].ts||0;if(!q||q.updated_at<t)up.push({key:'slot:'+id,updated_at:t,payload:lm[id]})});
   if(ch){putSlots(Object.keys(lm).map(function(k){return lm[k]}));redraw=true}
   var rc=rm.current,lts=S.ts||0,last=SY.last||0,take=false,has=lifeHas();
-  var cloudCh=!!rc&&rc.updated_at>last,localCh=lts>last&&has;
+  var cloudCh=!!rc&&rc.updated_at>last,localCh=lts>last;
   if(rc&&cloudCh&&localCh&&sameSt(rc.payload,S)){S.ts=rc.updated_at;cloudCh=false;localCh=false;syRaw()}
-  if(rc&&!has)take=true;
+  if(rc&&!has&&last===0)take=true;
   else if(rc&&cloudCh&&localCh){
     var pick=await new Promise(function(res){ask({title:'Zwei verschiedene Stände',msg:'Cloud (Spieldatum '+fd(rc.payload.date)+') und dieses Gerät (Spieldatum '+fd(S.date)+') wurden beide seit dem letzten Abgleich geändert. Der nicht gewählte Stand wird als gespeicherter Spielstand aufbewahrt, du verlierst nichts.',ok:'Übernehmen',info:1,fields:[{id:'c',l:'Welcher Stand soll gelten?',t:'select',o:['Cloud-Stand','Stand von diesem Gerät'],v:(rc.updated_at>lts?'Cloud-Stand':'Stand von diesem Gerät')}]},function(x){res(x.c)})});
     if(pick==='Stand von diesem Gerät'){var o=JSON.parse(JSON.stringify(rc.payload));o.lifeId=(o.lifeId||'L')+'-cloud';var keep=S;S=o;snapLife('Cloud-Stand '+fd(o.date));S=keep;S.ts=Date.now();syRaw();up.push({key:'current',updated_at:S.ts,payload:S})}
@@ -2750,7 +2756,7 @@ async function syncNow(){if(!syOn()||syBusy)return;syBusy=true;syMsg='Gleiche ab
   }
   else if(rc&&cloudCh)take=true;
   else if(rc&&localCh)up.push({key:'current',updated_at:lts,payload:S});
-  else if(!rc&&has){if(!S.ts)S.ts=Date.now();up.push({key:'current',updated_at:S.ts,payload:S})}
+  else if(!rc&&(has||last>0)){if(!S.ts)S.ts=Date.now();up.push({key:'current',updated_at:S.ts,payload:S})}
   if(take){setLife(rc.payload);S.ts=rc.updated_at;syRaw();redraw=true}
   if(up.length){var pr=await syFetch('/rest/v1/saves?on_conflict=user_id,key',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(up)});if(!pr.ok)throw new Error('Speichern '+pr.status)}
   SY.last=S.ts||0;syPut();bkSet();syMsg='Abgeglichen um '+syTime()+(take?' (neuer Stand geladen)':'');
@@ -2955,7 +2961,7 @@ var A={
   shareimg:function(){var o=window.__img;if(!o)return 1;try{fetch(o.url).then(function(r){return r.blob()}).then(function(b){var f=new File([b],'zuhause.png',{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]}))return navigator.share({files:[f],title:o.name});throw 0}).catch(function(){})}catch(e){}return 1},
   lsave:function(){ask({title:'Leben speichern',msg:'Unter diesem Namen wird der aktuelle Stand abgelegt. Gleicher Spielstand wird überschrieben.',ok:'Speichern',fields:[{id:'n',l:'Name des Spielstands',v:lifeLabel()}]},function(x){if(!snapLife(x.n||lifeLabel())){ask({title:'Speichern fehlgeschlagen',msg:'Der Browser-Speicher ist voll. Lösche alte Spielstände oder nutze die Sicherung.',info:1});return false}done()});return 1},
   lload:function(d){var sl=liveSlots().filter(function(x){return x.id===d.id})[0];if(!sl)return 1;ask({title:'„'+sl.label+'“ laden?',msg:'Das aktuelle Leben wird vorher automatisch gespeichert.',ok:'Laden'},function(){if(!snapLife()){ask({title:'Speichern fehlgeschlagen',msg:'Der Browser-Speicher ist voll, das aktuelle Leben wurde nicht gesichert. Es wurde nichts geladen.',info:1});return false}try{setLife(JSON.parse(sl.data))}catch(e){return false}tab='dash';done()});return 1},
-  rmphotos:function(){ask({title:'Hochgeladene Fotos entfernen?',msg:'Alle selbst hochgeladenen oder per „Infos laden“ geholten Fotos (Stadion, Stadt, Wappen, Partnerin usw.) werden aus dem aktuellen Leben und aus den gespeicherten Leben gelöscht. Die eingebauten Bilder bleiben. Stadionfotos kannst du über „Infos laden“ neu holen.',ok:'Entfernen'},function(){var n=stripImgs(S);var a=slots();a.forEach(function(x){try{var d=JSON.parse(x.data);n+=stripImgs(d);x.data=JSON.stringify(d)}catch(e){}});putSlots(a);S.img={};S.imgpos={};done();return false});return 1},
+  rmphotos:function(){ask({title:'Hochgeladene Fotos entfernen?',msg:'Alle selbst hochgeladenen oder per „Infos laden“ geholten Fotos (Stadion, Stadt, Wappen, Partnerin usw.) werden aus dem aktuellen Leben und aus den gespeicherten Leben gelöscht. Die eingebauten Bilder bleiben. Stadionfotos kannst du über „Infos laden“ neu holen.',ok:'Entfernen'},function(){var n=stripImgs(S);var a=slots();a.forEach(function(x){try{var d=JSON.parse(x.data);n+=stripImgs(d);x.data=JSON.stringify(d)}catch(e){}});putSlots(a);S.img={};S.imgpos={};done()});return 1},
   lnew:function(){ask({title:'Neues Leben beginnen?',msg:'Das aktuelle Leben wird vorher automatisch gespeichert und kann später wieder geladen werden.',ok:'Neu beginnen'},function(){if(!snapLife()){ask({title:'Speichern fehlgeschlagen',msg:'Der Browser-Speicher ist voll, das aktuelle Leben wurde nicht gesichert. Es wurde nichts verändert. Unter Kabine → Sync & Sicherung → Speicher kannst du hochgeladene Fotos entfernen oder alte Leben löschen.',info:1});return false}setLife({name:'',club:'',date:new Date().toISOString().slice(0,10),start:0,salary:0,partner:null,kids:[],cars:[],props:[],tx:[],log:[]});tab='pro';done();startDate();return false});return 1},
   ldel:function(d){var sl=liveSlots().filter(function(x){return x.id===d.id})[0];if(!sl)return 1;ask({title:'„'+sl.label+'“ löschen?',msg:'Dieser gespeicherte Spielstand wird endgültig entfernt.',ok:'Löschen'},function(){var al=slots();al.forEach(function(x){if(x.id===d.id){x.del=1;x.data='';x.ts=Date.now()}});putSlots(al);syQueue();done()});return 1},
   ffopen:function(){FFOPEN=!FFOPEN},
@@ -3061,7 +3067,7 @@ var A={
   pedit:function(){PD=null;tab='pro';return 1},
   pstat:function(){var s=v('ps');if(s!==S.partner.status){S.partner.status=s;log(S.partner.name+': Status jetzt „'+s+'“.')}},
   kid:function(){ask({title:'Kind eintragen',msg:'Für ein Kind, das schon geboren ist.',ok:'Eintragen',fields:[{id:'n',l:'Name',v:''},{id:'b',l:'Geburtsdatum',t:'date',v:S.date}]},function(x){if(!x.n||!x.b||x.b>S.date)return false;S.kids.push({name:x.n,born:x.b});log('Kind eingetragen: '+x.n+' (geboren '+fd(x.b)+').');done()});return 1},
-  mvin:function(){var p=S.partner;p.together=S.date;log('Ihr seid zusammengezogen: '+p.name+' und du.')},
+  mvin:function(){var p=S.partner;p.together=S.date;delete p.far;if(S.city)p.city=S.city;log('Ihr seid zusammengezogen: '+p.name+' und du.')},
   engage:function(){var p=S.partner;ask({title:'Antrag an '+p.name,ok:'Antrag machen',fields:[{id:'r',l:'Verlobungsring',t:'select',o:['Schlichter Ring (1.500 €)','Schöner Ring (4.000 €)','Luxus-Ring (15.000 €)'],v:'Schöner Ring (4.000 €)'}]},function(x){var c=x.r.indexOf('1.500')>-1?1500:x.r.indexOf('15.000')>-1?15000:4000;tx('Verlobungsring',-c);S.acts.push({id:Date.now()+Math.random(),date:S.date,cat:'Geschenk',label:'Verlobungsring – '+p.name,cost:c});p.status='Verlobt';p.eng=S.date;log('Verlobung! '+p.name+' hat Ja gesagt ('+eur.format(c)+' für den Ring).');done()});return 1},
   split:function(){var p=S.partner;ask({title:(p.status==='Verheiratet'?'Trennung':'Beziehung beenden')+'?',msg:p.name+(p.status==='Verheiratet'?'. Danach läuft das gesetzliche Trennungsjahr, erst dann ist eine Scheidung möglich.':''),ok:'Bestätigen'},function(){p.status='Getrennt';p.splitDate=S.date;S.ev=null;log('Trennung von '+p.name+'.');done()});return 1},
   divorce:function(){var p=S.partner;ask({title:'Scheidung',msg:'Anwalt und Gericht kosten etwa 3.500 €.',ok:'Scheiden'},function(){tx('Scheidung: Anwalt und Gericht',-3500);p.status='Geschieden';log('Scheidung von '+p.name+' (3.500 €).');done()});return 1},
