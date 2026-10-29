@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Off the Pitch</title>
-<meta name="build" content="V196"><link rel="manifest" href="manifest.webmanifest?v=2"><link rel="icon" type="image/png" href="icon-192-v2.png"><link rel="apple-touch-icon" href="apple-touch-icon-v2.png"><meta name="theme-color" content="#0F2A1C"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Off the Pitch">
+<meta name="build" content="V197"><link rel="manifest" href="manifest.webmanifest?v=2"><link rel="icon" type="image/png" href="icon-192-v2.png"><link rel="apple-touch-icon" href="apple-touch-icon-v2.png"><meta name="theme-color" content="#0F2A1C"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Off the Pitch">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&display=swap">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:wght@400;600&family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <script>try{var __k=localStorage.getItem("fmlife.skin");if(__k===null||__k==="tun")__k="mgi";if(__k&&__k!=="old")document.documentElement.setAttribute("data-skin",__k)}catch(e){}</script>
@@ -134,7 +134,7 @@ details.stm>div{padding:4px 12px 8px}
 .chip.on.top{background:var(--pi);color:#2a2a2a;border:1.5px solid #d4b84a;font-weight:700}
 .lzbar2{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:4px}.lzbar2 i{display:block;height:100%;background:var(--accent)}
 .evo{display:flex;flex-direction:column;gap:8px;margin-top:6px}.evo button{text-align:left;display:block;width:100%}.evo small{display:block;font-weight:400;opacity:.75;font-size:.82rem}.evo button:disabled{opacity:.45}
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:90}
 .md{background:var(--pi);color:#2a2a2a;border-radius:2px 2px 20px 2px;padding:18px;width:100%;max-width:380px;max-height:90vh;overflow:auto;box-shadow:0 16px 34px rgba(0,0,0,.5);transform:rotate(-.7deg)}
 .md h2{font-size:1.8rem}.md p{margin:0 0 10px;color:#4a4a4a}.md label{color:#555}
 .md input,.md select,.md textarea{margin-bottom:8px;background:rgba(255,255,255,.6);color:#222;border-bottom-color:#555}
@@ -666,7 +666,8 @@ button.g.ib::after{display:none}
 #totop{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:43;width:44px;height:44px;border-radius:50%;border:1.5px solid #D9B46A;background:rgba(23,64,43,.88);color:#F0CD82;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.4);opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .2s,transform .2s;padding:0;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 #totop.on{opacity:1;transform:none;pointer-events:auto}
 #totop svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-@media(max-width:700px){#mini{top:env(safe-area-inset-top,0px)}#mini .mt{font-size:1.15rem}#totop{bottom:calc(86px + env(safe-area-inset-bottom,0px));width:40px;height:40px}}
+body:has(#shfab:not([hidden])) #totop{bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+@media(max-width:700px){body:has(#shfab:not([hidden])) #totop{bottom:calc(150px + env(safe-area-inset-bottom,0px))}#mini{top:env(safe-area-inset-top,0px)}#mini .mt{font-size:1.15rem}#totop{bottom:calc(86px + env(safe-area-inset-bottom,0px));width:40px;height:40px}}
 
 /* Pinnwand v2: Kork, Rahmen, Fotos, Handy & PC */
 .zuw .cork{--ck1:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='a'><feTurbulence type='fractalNoise' baseFrequency='.62' numOctaves='4' seed='11'/><feColorMatrix values='0 0 0 0 .32  0 0 0 0 .17  0 0 0 0 .06  8 0 0 0 -3.95'/></filter><rect width='300' height='300' filter='url(%23a)'/></svg>");--ck2:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='b'><feTurbulence type='fractalNoise' baseFrequency='.5' numOctaves='3' seed='29'/><feColorMatrix values='0 0 0 0 .93  0 0 0 0 .78  0 0 0 0 .55  0 6 0 0 -3.55'/></filter><rect width='260' height='260' filter='url(%23b)'/></svg>");--ck3:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='700' height='700'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='3' seed='5'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .2  0 0 0 0 .08  0 0 1.6 0 -.55'/></filter><rect width='700' height='700' filter='url(%23c)'/></svg>")}
@@ -746,7 +747,13 @@ body.shson{overflow:hidden}
 .zuw .pol .ph.phi{aspect-ratio:auto;background:#e9e2cf}.zuw .pol .ph.phi>img{height:auto;max-height:70vw;object-fit:contain}
 :root[data-skin] .tile .th>b{font-size:1.4rem;letter-spacing:.04em;color:var(--accent)}
 :root[data-skin] .tile.go{cursor:pointer;transition:transform .12s,box-shadow .12s}:root[data-skin] .tile.go:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.35)}
-:root[data-skin] .tile.go .th>b.lnk::after{content:"Öffnen ›";margin-left:auto;font-size:.78rem;font-weight:700;letter-spacing:.04em;text-transform:none;border:1.5px solid currentColor;border-radius:10px;padding:3px 10px;color:var(--accent);background:none;position:static;height:auto;width:auto}
+:root[data-skin] .tile.go .th>b.lnk::after{content:none!important;display:none!important;margin-left:auto;font-size:.78rem;font-weight:700;letter-spacing:.04em;text-transform:none;border:1.5px solid currentColor;border-radius:10px;padding:3px 10px;color:var(--accent);background:none;position:static;height:auto;width:auto}
+:root[data-skin] .tile .th>b{display:inline-flex;align-items:center;gap:8px;width:auto;max-width:100%;padding:6px 14px;margin:0 0 10px;border:1px solid var(--accent);border-radius:999px;background:var(--card);color:var(--text);box-shadow:0 2px 6px rgba(0,0,0,.3);font-size:.95rem;font-weight:700;letter-spacing:.02em;text-transform:none}
+:root[data-skin="mgi"] .tile .th>b{background:#F3EAD4;color:#123524;border:1.5px solid #D9B46A}
+:root[data-skin="mgi"] .tile .th>b,:root[data-skin="mgi"] .tile .th>b.lnk{background:#F3EAD4!important;color:#123524!important;border:1.5px solid #D9B46A!important}
+#view.shs .item{flex-wrap:wrap;row-gap:6px}#view.shs .item .m{flex:1 1 140px}#view.shs .item>button{flex:none;margin-left:auto;white-space:nowrap}
+#view.shs .item:has(>.sw){display:grid;grid-template-columns:96px minmax(0,1fr);column-gap:12px;row-gap:8px;align-items:start}#view.shs .item:has(>.sw)>.sw{grid-row:1/3}#view.shs .item:has(>.sw)>.m{grid-column:2}#view.shs .item:has(>.sw)>button{grid-column:2;justify-self:start;margin-left:0}
+:root[data-skin] .tile .th>b::before{display:none}
 </style>
 </head>
 <body>
@@ -2636,6 +2643,7 @@ function freiView(){
   return '<div class="card" style="padding:0;overflow:hidden">'+bnrSvg(d.art,d.n,h0?(h0.on?'Aktiv':'Pausiert'):'Noch nicht dabei')+body+'</div></div>'};
  var hg=function(a){return a.length?'<div class="hgrid">'+a.map(hobCard).join('')+'</div>':''};
  var mine=HOB.filter(function(d){return hobOf(d.k)}),rest=HOB.filter(function(d){return !hobOf(d.k)});
+ if(KM==='e')return rest.length?hg(rest):'<div class="card sec"><small style="color:var(--muted)">Du bist schon in allen Hobbys dabei.</small></div>';
  h='<div class="card sec hsec"><h2>Meine Hobbys</h2><small style="color:var(--muted)">'+(mine.length?'Hobbys kosten Eintritt und monatliche Beiträge, die automatisch gebucht werden. Mit der Zeit wirst du besser.':'Noch in keinem Hobby. Weiter unten findest du Freizeitaktivitäten zum Beitreten.')+'</small></div>'+hg(mine)+(rest.length?'<div class="card sec hsec2"><h2>Freizeitaktivitäten</h2><small style="color:var(--muted)">Weitere Hobbys, denen du beitreten kannst. Aufnahme und Beiträge kosten Geld, manche brauchen einen Schein oder Besitz.</small></div>'+hg(rest):'');
  return h}
 var LUXA={
